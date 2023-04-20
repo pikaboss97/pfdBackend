@@ -19,9 +19,16 @@ exports.auth = async function (req, res) {
                 let saved = await credentialModel.create({
                     username: record.Alumno,
                     code: params.username,
-                    password: params.password
+                    password: params.password,
+                    facultad: record.Facultad,
+                    ep: record.EscuelaProfesional,
+                    tc: record.TC,
+                    ca: record.CA,
+                    cm: record.CM,
+                    ea: record.EC,
+                    ala: 0
                 });
-                res.status(200).send(record);
+                res.status(200).send(saved);
             }
         } else {
             res.status(401).send({ msg: 'AUTH_ERROR' });
@@ -34,6 +41,12 @@ exports.auth = async function (req, res) {
 exports.getPdf = async function (req, res) {
     let params = req.body;
     const data = await recordModel.findOne({ Code: params.username })
+    res.send(data);
+}
+
+exports.getUserData = async function (req,res){
+    let params = req.body;
+    const data = await credentialModel.findOne({ code: params.code })
     res.send(data);
 }
 
