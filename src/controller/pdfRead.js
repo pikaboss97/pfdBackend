@@ -28,6 +28,7 @@ exports.auth = async function (req, res) {
                     ea: record.EC,
                     ala: 0
                 });
+                delete password
                 res.status(200).send(saved);
             }
         } else {
@@ -45,8 +46,9 @@ exports.getPdf = async function (req, res) {
 }
 
 exports.getUserData = async function (req,res){
-    let params = req.body;
+    let params = req.query;
     const data = await credentialModel.findOne({ code: params.code })
+    delete data.password;
     res.send(data);
 }
 
