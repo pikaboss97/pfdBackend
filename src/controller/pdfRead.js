@@ -2,25 +2,33 @@ const path = require('path');
 const PDFParser = require('pdf-parse');
 const util = require('../utils/unas');
 const recordModel = require('../model/Record');
+const credentialModel = require('../model/Credentials')
 const fs = require('fs');
 var axios = require('axios');
 var qs = require('qs');
-const { response } = require('express');
 
 exports.auth = async function (req, res) {
-    let params = req.body;
-    let auth = await authOcdaApi(params);
-    if(auth){
-        const data = await recordModel.findOne({ Code: params.username })
-        if(data)res.status(200).send(data);
-        else{
-            let record = await getRemoteRecord(auth, params)
-            res.status(200).send(record);
+    try {
+        let params = req.body;
+        let auth = await authOcdaApi(params);
+        if (auth) {
+            const data = await recordModel.findOne({ Code: params.username })
+            if (data) res.status(200).send(data);
+            else {
+                let record = await getRemoteRecord(auth, params)
+                let saved = await credentialModel.create({
+                    username: record.Alumno,
+                    code: params.username,
+                    password: params.password
+                });
+                res.status(200).send(record);
+            }
+        } else {
+            res.status(401).send({ msg: 'AUTH_ERROR' });
         }
-    }else{
-        res.status(401).send({msg:'AUTH_ERROR'});
+    } catch (error) {
+        res.status(500).send({ msg: 'SERVER_ERROR' });
     }
-
 }
 
 exports.getPdf = async function (req, res) {
@@ -195,7 +203,7 @@ async function GetRecordByFetch(cookie, code) {
         url: 'https://academico.unas.edu.pe/',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': '_ga=GA1.3.1493189822.1681845187; _gid=GA1.3.1258299258.1681845187; SGASID='+cookie,
+            'Cookie': '_ga=GA1.3.1493189822.1681845187; _gid=GA1.3.1258299258.1681845187; SGASID=' + cookie,
             'Host': 'academico.unas.edu.pe'
         },
         data: data,
@@ -218,7 +226,7 @@ async function GetRecordByFetch(cookie, code) {
 }
 
 async function authOcdaApi(user) {
-    var data = 'username='+user.username+'&userpasw=%242y%2447%249%40J'+user.password+'L&captcha='+user.captcha;
+    var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
@@ -241,7 +249,7 @@ async function authOcdaApi(user) {
     try {
         const response = await axios(config);
         const headers = response.headers['set-cookie'];
-        return getStringBetween(headers[0],"SGASID=","; path");
+        return getStringBetween(headers[0], "SGASID=", "; path");
     } catch (error) {
         return null;
     }
@@ -250,7 +258,7 @@ async function authOcdaApi(user) {
 async function getRemoteRecord(cookie, user) {
     const baseDir = path.dirname(__dirname);
     const buffer = await GetRecordByFetch(cookie, user.username);
-    const dataBuffer = await fs.readFileSync(baseDir + '/assets/'+user.username + '.pdf');
+    const dataBuffer = await fs.readFileSync(baseDir + '/assets/' + user.username + '.pdf');
     let data = await PDFParser(dataBuffer);
     let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
     let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
@@ -304,7 +312,6 @@ async function getRemoteRecord(cookie, user) {
         "Asignaturas": asignaturas.resp
     }
     let saved = await recordModel.create(response);
-    console.log(saved);
     return saved;
 }
 
