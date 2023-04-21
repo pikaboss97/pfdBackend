@@ -60,12 +60,12 @@ exports.getUserData = async function (req, res) {
 
 exports.getCaptcha = async function (req, res) {
     try {
-        let cookie = req.query.c; 
+        let cookie = req.query.c;
         const data = await getNewCaptcha(cookie)
         let captcha = getStringBetween(data, 'id="capcode" src="', '" alt');
         res.status(200).send(captcha);
     } catch (error) {
-        
+
         res.status(500).send("CAPTCHA_NOT_FOUND");
     }
 }
@@ -243,17 +243,12 @@ async function GetRecordByFetch(cookie, code) {
             'Host': 'academico.unas.edu.pe'
         },
         data: data,
-        responseType: 'stream'
+        responseType: 'arraybuffer'
     };
     try {
         const response = await axios(config);
-        const writer = fs.createWriteStream(baseDir + '/assets/' + code + '.pdf');
-        response.data.pipe(writer);
-        await new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-        });
-        return response.data;
+        const pdfBuffer = Buffer.from(response.data, 'binary');
+        return pdfBuffer;
     } catch (error) {
         console.error('Error al descargar el archivo:', error);
         return error;
@@ -276,14 +271,14 @@ async function authOcdaApi(user, cookie) {
             'Connection': 'keep-alive',
             'Referer': 'https://academico.unas.edu.pe/login',
             'Content-Length': '127',
-            'Cookie': 'SGASID='+cookie,
+            'Cookie': 'SGASID=' + cookie,
             'X-Requested-With': 'XMLHttpRequest'
         },
         data: data
     };
     try {
         const response = await axios(config);
-        if(!response.data.login) throw new Error('no login');
+        if (!response.data.login) throw new Error('no login');
         const headers = response.headers['set-cookie'];
         return getStringBetween(headers[0], "SGASID=", "; path");
     } catch (error) {
@@ -295,8 +290,7 @@ async function getRemoteRecord(cookie, user) {
     try {
         const baseDir = path.dirname(__dirname);
         const buffer = await GetRecordByFetch(cookie, user.username);
-        const dataBuffer = await fs.readFileSync(baseDir + '/assets/' + user.username + '.pdf');
-        let data = await PDFParser(dataBuffer);
+        let data = await PDFParser(buffer);
         let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
         let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
@@ -361,7 +355,7 @@ async function getNewCaptcha(cookie) {
         method: 'get',
         url: 'https://academico.unas.edu.pe/login',
         headers: {
-            'Cookie': 'SGASID='+cookie+'; _ga=GA1.3.1493189822.1681845187; _gat_gtag_UA_34189061_1=1; _gid=GA1.3.1258299258.1681845187; SGASID='+cookie,
+            'Cookie': 'SGASID=' + cookie + '; _ga=GA1.3.1493189822.1681845187; _gat_gtag_UA_34189061_1=1; _gid=GA1.3.1258299258.1681845187; SGASID=' + cookie,
             'Connection': 'keep-alive'
         }
     };
