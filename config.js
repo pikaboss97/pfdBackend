@@ -23,7 +23,9 @@ app.get('/pdf', pdfReader.loadPdf);
 app.post('/auth', pdfReader.auth);
 app.post('/notas', pdfReader.getPdf);
 app.get('/captcha', pdfReader.getCaptcha);
-app.get('/getUser',pdfReader.getUserData)
+app.get('/getUser',pdfReader.getUserData);
+app.get('/cookie',pdfReader.getCookie);
+
 
 //app.get('/getPdf', pdfReader.getPdf);
 

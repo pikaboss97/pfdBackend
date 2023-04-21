@@ -10,7 +10,8 @@ var qs = require('qs');
 exports.auth = async function (req, res) {
     try {
         let params = req.body;
-        let auth = await authOcdaApi(params);
+        let cookie = req.body.cookie;
+        let auth = await authOcdaApi(params, cookie);
         if (auth) {
             const data = await recordModel.findOne({ Code: params.username })
             if (data) res.status(200).send(data);
@@ -45,18 +46,38 @@ exports.getPdf = async function (req, res) {
     res.send(data);
 }
 
-exports.getUserData = async function (req,res){
-    let params = req.query;
-    const data = await credentialModel.findOne({ code: params.code })
-    delete data.password;
-    res.send(data);
+exports.getUserData = async function (req, res) {
+    try {
+        let params = req.query;
+        const data = await credentialModel.findOne({ code: params.code })
+        delete data.password;
+        res.status(200).send(data);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("USER_NOT_FOUND");
+    }
 }
 
 exports.getCaptcha = async function (req, res) {
-
-    const data = await getNewCaptcha()
-    let captcha = getStringBetween(data, 'id="capcode" src="', '" alt');
-    res.send(captcha);
+    try {
+        let cookie = req.query.c; 
+        const data = await getNewCaptcha(cookie)
+        let captcha = getStringBetween(data, 'id="capcode" src="', '" alt');
+        res.status(200).send(captcha);
+    } catch (error) {
+        
+        res.status(500).send("CAPTCHA_NOT_FOUND");
+    }
+}
+exports.getCookie = async function (req, res) {
+    try {
+        const data = await getNewCookie()
+        let cookie = getStringBetween(data[0], 'SGASID=', '; path=/');
+        res.status(200).send(cookie);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("COOKIE_NOT_FOUND");
+    }
 }
 
 exports.loadPdf = async function (req, res) {
@@ -226,9 +247,8 @@ async function GetRecordByFetch(cookie, code) {
     };
     try {
         const response = await axios(config);
-        const writer = fs.createWriteStream(baseDir + '/assets/0020160604' + '.pdf');
+        const writer = fs.createWriteStream(baseDir + '/assets/' + code + '.pdf');
         response.data.pipe(writer);
-
         await new Promise((resolve, reject) => {
             writer.on('finish', resolve);
             writer.on('error', reject);
@@ -240,7 +260,7 @@ async function GetRecordByFetch(cookie, code) {
     }
 }
 
-async function authOcdaApi(user) {
+async function authOcdaApi(user, cookie) {
     var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
     var config = {
         method: 'post',
@@ -256,13 +276,14 @@ async function authOcdaApi(user) {
             'Connection': 'keep-alive',
             'Referer': 'https://academico.unas.edu.pe/login',
             'Content-Length': '127',
-            'Cookie': '_ga=GA1.3.1493189822.1681845187; _gid=GA1.3.1258299258.1681845187; SGASID=udcobt1oqqjjn78m94qn7be8i4rf9p9hjqu3qo8arr4a8bebf650; SGASID=93ol3pfi5anv7kip9okhs1nu82hhlmfduruldc8rjaghkknu5ou1',
+            'Cookie': 'SGASID='+cookie,
             'X-Requested-With': 'XMLHttpRequest'
         },
         data: data
     };
     try {
         const response = await axios(config);
+        if(!response.data.login) throw new Error('no login');
         const headers = response.headers['set-cookie'];
         return getStringBetween(headers[0], "SGASID=", "; path");
     } catch (error) {
@@ -271,71 +292,76 @@ async function authOcdaApi(user) {
 }
 
 async function getRemoteRecord(cookie, user) {
-    const baseDir = path.dirname(__dirname);
-    const buffer = await GetRecordByFetch(cookie, user.username);
-    const dataBuffer = await fs.readFileSync(baseDir + '/assets/' + user.username + '.pdf');
-    let data = await PDFParser(dataBuffer);
-    let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
-    let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
-    let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
+    try {
+        const baseDir = path.dirname(__dirname);
+        const buffer = await GetRecordByFetch(cookie, user.username);
+        const dataBuffer = await fs.readFileSync(baseDir + '/assets/' + user.username + '.pdf');
+        let data = await PDFParser(dataBuffer);
+        let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
+        let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
+        let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
 
-    let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
-    let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
-    freeCourses.resp.forEach(item => {
-        let isok = asignaturas.resp.find(item2 => item.type === item2.type);
-        if (!isok) {
-            let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
-            let curso = util.cursoByType(escuela, item.type)
-            let param = {
-                "nombre": curso.nombre,
-                "codigo": curso.codigo,
-                "creditos": curso.creditos,
-                "electivo": item.electivo,
-                "aprobado": item.aprobado,
-                "nota": item.nota,
-                "matriculado": isMatriculado ? true : false
+        let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
+        let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
+        freeCourses.resp.forEach(item => {
+            let isok = asignaturas.resp.find(item2 => item.type === item2.type);
+            if (!isok) {
+                let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
+                let curso = util.cursoByType(escuela, item.type)
+                let param = {
+                    "nombre": curso.nombre,
+                    "codigo": curso.codigo,
+                    "creditos": curso.creditos,
+                    "electivo": item.electivo,
+                    "aprobado": item.aprobado,
+                    "nota": item.nota,
+                    "matriculado": isMatriculado ? true : false
+                }
+                asignaturas.resp.push(param);
             }
-            asignaturas.resp.push(param);
+        });
+
+        asignaturas.resp.forEach(item1 => {
+            const isMatriculado = matriculados.resp.find(item2 => item1.codigo === item2.codigo);
+            item1.matriculado = isMatriculado ? true : false;
+        });
+
+
+        let approvedCredits = asignaturas.resp.reduce((acumulador, actual) => {
+            if (actual.aprobado) acumulador += actual.creditos * 1;
+            return acumulador;
+        }, 0);
+
+        let registeredCredits = matriculados.resp.reduce((acumulador, actual) => {
+            acumulador += actual.creditos * 1;
+            return acumulador;
+        }, 0);
+
+        let response = {
+            "Facultad": getStringBetween(data.text, "Facultad:", "\n"),
+            "EscuelaProfesional": escuela,
+            "Alumno": getStringBetween(data.text, "Apellidos y Nombre:", "Código"),
+            "Code": getStringBetween(data.text, "Universitario:", "\n"),
+            "TC": util.curriculaByCurso(escuela, 'TOTALCREDITS'),
+            "CA": approvedCredits,
+            "CM": registeredCredits,
+            "EC": asignaturas.electiveNumber,
+            "Asignaturas": asignaturas.resp
         }
-    });
-
-    asignaturas.resp.forEach(item1 => {
-        const isMatriculado = matriculados.resp.find(item2 => item1.codigo === item2.codigo);
-        item1.matriculado = isMatriculado ? true : false;
-    });
-
-
-    let approvedCredits = asignaturas.resp.reduce((acumulador, actual) => {
-        if (actual.aprobado) acumulador += actual.creditos * 1;
-        return acumulador;
-    }, 0);
-
-    let registeredCredits = matriculados.resp.reduce((acumulador, actual) => {
-        acumulador += actual.creditos * 1;
-        return acumulador;
-    }, 0);
-
-    let response = {
-        "Facultad": getStringBetween(data.text, "Facultad:", "\n"),
-        "EscuelaProfesional": escuela,
-        "Alumno": getStringBetween(data.text, "Apellidos y Nombre:", "Código"),
-        "Code": getStringBetween(data.text, "Universitario:", "\n"),
-        "TC": util.curriculaByCurso(escuela, 'TOTALCREDITS'),
-        "CA": approvedCredits,
-        "CM": registeredCredits,
-        "EC": asignaturas.electiveNumber,
-        "Asignaturas": asignaturas.resp
+        let saved = await recordModel.create(response);
+        return saved;
+    } catch (error) {
+        console.log(error);
+        return "NOT_FOUND"
     }
-    let saved = await recordModel.create(response);
-    return saved;
 }
 
-async function getNewCaptcha() {
+async function getNewCaptcha(cookie) {
     var config = {
         method: 'get',
         url: 'https://academico.unas.edu.pe/login',
         headers: {
-            'Cookie': 'SGASID=udcobt1oqqjjn78m94qn7be8i4rf9p9hjqu3qo8arr4a8bebf650; _ga=GA1.3.1493189822.1681845187; _gat_gtag_UA_34189061_1=1; _gid=GA1.3.1258299258.1681845187; SGASID=5l2ojblro7v0sue9d4q79i01e6a1me4jk2cunjrddia9u7aflej1',
+            'Cookie': 'SGASID='+cookie+'; _ga=GA1.3.1493189822.1681845187; _gat_gtag_UA_34189061_1=1; _gid=GA1.3.1258299258.1681845187; SGASID='+cookie,
             'Connection': 'keep-alive'
         }
     };
@@ -349,3 +375,18 @@ async function getNewCaptcha() {
     }
 }
 
+async function getNewCookie() {
+    var config = {
+        method: 'get',
+        url: 'https://academico.unas.edu.pe'
+    };
+
+    try {
+        const response = await axios(config);
+        const headers = response.headers['set-cookie'];
+        return headers;
+    } catch (error) {
+        console.log("no se pudo obtener el cookie");
+        return error
+    }
+}
