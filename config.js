@@ -25,6 +25,7 @@ app.post('/notas', pdfReader.getPdf);
 app.get('/captcha', pdfReader.getCaptcha);
 app.get('/getUser',pdfReader.getUserData);
 app.get('/cookie',pdfReader.getCookie);
+app.get('/traer',curricula.getAllCareer)
 
 
 //app.get('/getPdf', pdfReader.getPdf);

@@ -13,14 +13,18 @@ exports.auth = async function (req, res) {
         let cookie = req.body.cookie;
         let auth = await authOcdaApi(params, cookie);
         if (auth) {
-            const data = await recordModel.findOne({ Code: params.username })
-            if (data) res.status(200).send(data);
+            const data = await credentialModel.findOne({ code: params.username })
+            if (data) {
+                delete data.password;
+                res.status(200).send(data);
+            }
             else {
+                let data = await getRemoteStudentData(auth)
                 let record = await getRemoteRecord(auth, params)
                 let saved = await credentialModel.create({
                     username: record.Alumno,
                     code: params.username,
-                    password: params.password,
+                    password: params.usr,
                     facultad: record.Facultad,
                     ep: record.EscuelaProfesional,
                     tc: record.TC,
@@ -229,7 +233,6 @@ function getStringBetween(str, start, end, isglobal = false) {
 }
 
 async function GetRecordByFetch(cookie, code) {
-    const baseDir = path.dirname(__dirname);
     var data = qs.stringify({
         'load': 'StudentRecordNotesController@export',
         'data[studentId]': code
@@ -257,6 +260,7 @@ async function GetRecordByFetch(cookie, code) {
 
 async function authOcdaApi(user, cookie) {
     var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
+    console.log(data);
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
@@ -282,6 +286,34 @@ async function authOcdaApi(user, cookie) {
         const headers = response.headers['set-cookie'];
         return getStringBetween(headers[0], "SGASID=", "; path");
     } catch (error) {
+        return null;
+    }
+}
+async function getRemoteStudentData(cookie) {
+    try {
+        var config = {
+            method: 'get',
+            url: 'https://academico.unas.edu.pe/alumno',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Pragma': 'no-cache',
+                'Cookie': '_ga=GA1.3.1977725257.1682133790; _gid=GA1.3.1927325883.1682133790; SGASID=' + cookie,
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Cache-Control': 'no-cache',
+                'Host': 'academico.unas.edu.pe',
+                'Accept-Language': 'es-419,es;q=0.9',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15',
+                'Referer': 'https://academico.unas.edu.pe/',
+                'Connection': 'keep-alive'
+            }
+        };
+        const response = await axios(config);
+        if (!response.data) throw new Error('no student data');
+        console.log(response.data);
+        return true;
+        //return getStringBetween(response.data, "SGASID=", "; path");
+    } catch (error) {
+        console.log(error);
         return null;
     }
 }

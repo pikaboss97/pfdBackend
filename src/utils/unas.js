@@ -88,7 +88,6 @@ const CURRICULA = {
     'IS030104': { codigo: "IS030104", nombre: "REDACCION Y COMPRENSION LECTORA", creditos: "4", semestre: "1", type: "I" },
     'IS030203': { codigo: "IS030203", nombre: "REDACCION Y COMPRENSION LECTORA", creditos: "4", semestre: "1", type: "I" },
 
-
     //'BI010102': { codigo: "BI010102", nombre: "FISICA I", creditos: "4", semestre: "2", type:"P" },
     'IS030202': { codigo: "IS030202", nombre: "FISICA I", creditos: "4", semestre: "2", type: "P" },
     //'BI010201': { codigo: "BI010201", nombre: "MATEMATICA I", creditos: "4", semestre: "2", type:"P" },

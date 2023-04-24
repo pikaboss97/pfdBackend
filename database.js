@@ -1,5 +1,6 @@
+require('dotenv').config();
 const mongoose = require('mongoose')
-const DB_URI = 'mongodb+srv://vega097:hQm4JURW9G2cLeKJ@miprogresoacademico.ogp0b64.mongodb.net/data?retryWrites=true&w=majority';
+const DB_URI = process.env.MONGO_URI;
 
 module.exports = () => {
     const connect = () => {
