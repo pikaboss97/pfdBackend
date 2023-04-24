@@ -19,21 +19,25 @@ exports.auth = async function (req, res) {
                 res.status(200).send(data);
             }
             else {
-                //let data = await getRemoteStudentData(auth)
-                let record = await getRemoteRecord(auth, params)
-                let saved = await credentialModel.create({
-                    username: record.Alumno,
-                    code: params.username,
-                    password: params.usr,
-                    facultad: record.Facultad,
-                    ep: record.EscuelaProfesional,
-                    tc: record.TC,
-                    ca: record.CA,
-                    cm: record.CM,
-                    ea: record.EC,
-                    ala: 0
-                });
-                delete password
+                try {
+                    //let data = await getRemoteStudentData(auth)
+                    let record = await getRemoteRecord(auth, params)
+                    let saved = await credentialModel.create({
+                        username: record.Alumno,
+                        code: params.username,
+                        password: params.usr,
+                        facultad: record.Facultad,
+                        ep: record.EscuelaProfesional,
+                        tc: record.TC,
+                        ca: record.CA,
+                        cm: record.CM,
+                        ea: record.EC,
+                        ala: 0
+                    });
+                    delete password
+                } catch (error) {
+                    console.log(error);
+                }
                 res.status(200).send(saved);
             }
         } else {
@@ -260,7 +264,6 @@ async function GetRecordByFetch(cookie, code) {
 
 async function authOcdaApi(user, cookie) {
     var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
-    console.log(data);
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
