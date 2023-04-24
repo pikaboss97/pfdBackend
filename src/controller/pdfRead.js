@@ -19,7 +19,7 @@ exports.auth = async function (req, res) {
                 res.status(200).send(data);
             }
             else {
-                let data = await getRemoteStudentData(auth)
+                //let data = await getRemoteStudentData(auth)
                 let record = await getRemoteRecord(auth, params)
                 let saved = await credentialModel.create({
                     username: record.Alumno,
