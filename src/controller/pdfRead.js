@@ -22,7 +22,7 @@ exports.auth = async function (req, res) {
                 try {
                     //let data = await getRemoteStudentData(auth)
                     let record = await getRemoteRecord(auth, params)
-                    let saved = await credentialModel.create({
+                    let userInfo = {
                         username: record.Alumno,
                         code: params.username,
                         password: params.usr,
@@ -33,12 +33,15 @@ exports.auth = async function (req, res) {
                         cm: record.CM,
                         ea: record.EC,
                         ala: 0
-                    });
-                    delete password
+                    }
+                    let saved = await credentialModel.create(userInfo);
+                    let response = saved;
+                    delete response.password;
+                    res.status(200).send(response);
                 } catch (error) {
                     console.log(error);
+                    res.status(500).send({ msg: 'SAVE_INFO_ERROR' });
                 }
-                res.status(200).send(saved);
             }
         } else {
             res.status(401).send({ msg: 'AUTH_ERROR' });
