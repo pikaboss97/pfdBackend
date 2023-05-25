@@ -19,11 +19,11 @@ exports.getAllCareer = async function (req, res) {
     };
     const response = await axios(config);
     let data = response.data.slice(response.data.indexOf('<article '), response.data.indexOf('<footer '));
-    //let careerList = getStringBetween(data, 'href="/planes-de-estudio/', '">', "g")
-    let careerList = ['fiis-epiis'];
+    let careerList = getStringBetween(data, 'href="/planes-de-estudio/', '">', "g")
+    //let careerList = ['fiis-epiis'];
     //GET CURRICULAS BY CAREER
     let allCarrers = [];
-    for(car in careerList){
+    for (car in careerList) {
         let curriculas = await getAllCurriculaByCareer(careerList[car]);
         allCarrers.push(curriculas);
     }
@@ -39,21 +39,21 @@ async function getAllCurriculaByCareer(url) {
     };
     const response = await axios(config);
     let tableString = response.data.slice(response.data.indexOf('<table '), response.data.indexOf('</table>') + 8);
-    let planesList = getStringBetween(tableString, 'href="/planes-de-estudio/'+url+'/', '" style=', "g");
+    let planesList = getStringBetween(tableString, 'href="/planes-de-estudio/' + url + '/', '" style=', "g");
     let curriculas = await getCurriculaByYear(planesList);
     console.log(curriculas);
     // cargar la tabla HTML con cheerio
     const $ = cheerio.load(tableString)
     // obtener las filas de la tabla y convertirlas a JSON
-     const filas = $('tr').toArray().map((fila, index) => {
+    const filas = $('tr').toArray().map((fila, index) => {
         const celdas = $(fila).find('td').toArray().map(celda => $(celda).text())
         let response = {
             name: celdas[0],
             year: celdas[1],
             status: celdas[2],
             credits: celdas[3],
-            code: planesList[index-1],
-            cursos: celdas[0] ? curriculas[index-1] : {} 
+            code: planesList[index - 1],
+            cursos: celdas[0] ? curriculas[index - 1] : {}
         }
         return response
     })
@@ -63,11 +63,9 @@ async function getAllCurriculaByCareer(url) {
 
 }
 
-async function getCurriculaByYear(plan){
-
-for (e in plan){
-     
-}
+async function getCurriculaByYear(plan) {
+    
+    return plan;
 }
 
 function responseFormat(data) {

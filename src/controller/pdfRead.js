@@ -1,6 +1,7 @@
 const path = require('path');
 const PDFParser = require('pdf-parse');
 const util = require('../utils/unas');
+const convert = require('../utils/functions');
 const recordModel = require('../model/Record');
 const credentialModel = require('../model/Credentials')
 const fs = require('fs');
@@ -27,6 +28,7 @@ exports.auth = async function (req, res) {
                         code: params.username,
                         password: params.usr,
                         facultad: record.Facultad,
+                        admission: params.username.slice(2, 6),
                         ep: record.EscuelaProfesional,
                         tc: record.TC,
                         ca: record.CA,
@@ -76,7 +78,6 @@ exports.getCaptcha = async function (req, res) {
         let captcha = getStringBetween(data, 'id="capcode" src="', '" alt');
         res.status(200).send(captcha);
     } catch (error) {
-
         res.status(500).send("CAPTCHA_NOT_FOUND");
     }
 }
@@ -92,14 +93,19 @@ exports.getCookie = async function (req, res) {
 }
 
 exports.loadPdf = async function (req, res) {
+    let dataBuffer;
+    if (!req.file) {
+        const baseDir = path.dirname(__dirname);
+        dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604' + '.pdf');
+    }else{
+        dataBuffer = req.file.buffer;
+    }
 
-    const baseDir = path.dirname(__dirname);
-    const buffer = await GetRecordByFetch();
-    const dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604' + '.pdf');
     let data = await PDFParser(dataBuffer);
     let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
     let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
-    let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
+    let mallaActual = req.file ? escuela+req.body.Year : escuela; 
+    let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
 
     let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
     let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
@@ -107,7 +113,7 @@ exports.loadPdf = async function (req, res) {
         let isok = asignaturas.resp.find(item2 => item.type === item2.type);
         if (!isok) {
             let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
-            let curso = util.cursoByType(escuela, item.type)
+            let curso = util.cursoByType(mallaActual, item.type)
             let param = {
                 "nombre": curso.nombre,
                 "codigo": curso.codigo,
@@ -126,6 +132,28 @@ exports.loadPdf = async function (req, res) {
         item1.matriculado = isMatriculado ? true : false;
     });
 
+    if(req.file){
+        Object.keys(util.curricula(mallaActual)).forEach(curso => {
+            const cursos = asignaturas.resp.find(item => curso === item.codigo);
+            if(!cursos){
+                let cursoOfCurricula = util.curriculaByCurso(mallaActual,curso);
+                if(!cursoOfCurricula.electivo && typeof(cursoOfCurricula) == "object" ){
+                    let param = {
+                        "nombre": cursoOfCurricula.nombre,
+                        "codigo": cursoOfCurricula.codigo,
+                        "creditos": cursoOfCurricula.creditos,
+                        "electivo": false,
+                        "aprobado": false,
+                        "nota": "No cursado",
+                        "matriculado": false
+                    }
+                    asignaturas.resp.push(param)
+                }
+    
+                
+            }
+        });
+    }
 
     let approvedCredits = asignaturas.resp.reduce((acumulador, actual) => {
         if (actual.aprobado) acumulador += actual.creditos * 1;
@@ -142,15 +170,23 @@ exports.loadPdf = async function (req, res) {
         "EscuelaProfesional": escuela,
         "Alumno": getStringBetween(data.text, "Apellidos y Nombre:", "Código"),
         "Code": getStringBetween(data.text, "Universitario:", "\n"),
-        "TC": util.curriculaByCurso(escuela, 'TOTALCREDITS'),
+        "TC": util.curriculaByCurso(mallaActual, 'TOTALCREDITS'),
         "CA": approvedCredits,
         "CM": registeredCredits,
         "EC": asignaturas.electiveNumber,
         "Asignaturas": asignaturas.resp
     }
-    let saved = await recordModel.create(response);
-    console.log(saved);
-    res.send(response);
+    //let saved = await recordModel.create(response);
+    //console.log(saved);
+    if(req.file){
+        const excelFile = convert.jsonToExcel(asignaturas.resp)
+        let filename = response.Alumno.replace(" ","_");
+        res.attachment(filename.replace(",","")+'.xlsx');
+        res.send(excelFile);
+    }else{
+        res.send(response);
+    }
+   
 }
 
 function getCoursesByCode(record, cursos) {
@@ -332,6 +368,7 @@ async function getRemoteRecord(cookie, user) {
         let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
         let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
+        let ponderados = false;
 
         let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());

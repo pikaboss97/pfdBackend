@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Cargar PDF</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+
+<body>
+    <div class="card">
+        <h1 class="title">Cargar PDF</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div style="display: inline-grid;">
+                <select name="Year" id="year" style="margin: 20px;">
+                    <option value="2018">2018</option>
+                    <option value="2009">2009</option>
+                </select>
+                <input type="file" name="pdfFile" accept=".pdf" style="margin-left: 20px;">
+                <button class="button" type="submit">Enviar</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
+
+<style>
+    .card {
+        margin: 20% 40%;
+    }
+
+    .button {
+        color: white;
+        background-color: rgb(177, 32, 32);
+        margin-top: 10px;
+        border-radius: 10px;
+    }
+    .title{
+        margin-left: 30px;
+    }
+</style>
