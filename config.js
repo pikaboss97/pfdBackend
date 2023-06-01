@@ -30,6 +30,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/curricula', curricula.getCurricula);
+app.get('/curricula/list', curricula.getAllCurriculas);
 app.get('/pdf', pdfReader.loadPdf);
 app.post('/auth', pdfReader.auth);
 app.post('/notas', pdfReader.getPdf);

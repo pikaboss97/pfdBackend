@@ -11,6 +11,37 @@ exports.getCurricula = function (req, res) {
     res.send(resp);
 }
 
+exports.getAllCurriculas = function (req, res) {
+    let resp = {
+        endpoint: "getAllCurriculas",
+        status: 1,
+        msg: "success",
+        list: [
+            {
+                escuelaP: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                facultad: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                codigo: "IS03",
+                year: "2018",
+                credits:"215",
+                status:"VIGENTE",
+                requestCode: "FIIS2018"
+
+            },
+            {
+                escuelaP: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                facultad: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                codigo: "NEIS",
+                year: "2009",
+                status:"NO VIGENTE",
+                credits:"215",
+                requestCode: "FIIS2009"
+
+            }
+        ]
+    }
+    res.send(resp);
+}
+
 exports.getAllCareer = async function (req, res) {
     //GET ALL LIST OF CAREERS
     var config = {
