@@ -20,9 +20,16 @@ exports.getAllCurriculas = function (req, res) {
             {
                 escuelaP: "INGENIERIA EN INFORMATICA Y SISTEMAS",
                 facultad: "INGENIERIA EN INFORMATICA Y SISTEMAS",
-                codigo: "IS03",
+                plan: "PLAN DE ESTUDIOS ING. EN INFORMATICA Y SISTEMAS 2018 (IS03)",
+                resolucion:"",
+                fInicio: "2018-I",
+                codigo: "EPIIS2018",
                 year: "2018",
                 credits:"215",
+                cObligatorio: "196",
+                cElectivo:"12",
+                aLibres: "3",
+                ppp:"4",
                 status:"VIGENTE",
                 requestCode: "FIIS2018"
 
@@ -30,11 +37,35 @@ exports.getAllCurriculas = function (req, res) {
             {
                 escuelaP: "INGENIERIA EN INFORMATICA Y SISTEMAS",
                 facultad: "INGENIERIA EN INFORMATICA Y SISTEMAS",
-                codigo: "NEIS",
+                plan: "PLAN DE ESTUDIOS ING. EN INFORMATICA Y SISTEMAS 2009 (NEIS)",
+                resolucion:"013-2009",
+                fInicio: "2009-1",
+                codigo: "FIIS2009",
                 year: "2009",
-                status:"NO VIGENTE",
                 credits:"215",
+                cObligatorio: "202",
+                cElectivo:"8",
+                aLibres: "2",
+                ppp:"3",
+                status:"NO VIGENTE",
                 requestCode: "FIIS2009"
+
+            },
+            {
+                escuelaP: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                facultad: "INGENIERIA EN INFORMATICA Y SISTEMAS",
+                plan: "PLAN DE ESTUDIOS ING. EN INFORMATICA Y SISTEMAS 2000 (N0)",
+                resolucion:"NNNNN",
+                fInicio: "2000-1",
+                codigo: "FIIS2000",
+                year: "2000",
+                credits:"215",
+                cObligatorio: "203",
+                cElectivo:"8",
+                aLibres: "1",
+                ppp:"3",
+                status:"NO VIGENTE",
+                requestCode: ""
 
             }
         ]
