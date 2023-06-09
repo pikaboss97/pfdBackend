@@ -7,6 +7,7 @@ const credentialModel = require('../model/Credentials')
 const fs = require('fs');
 var axios = require('axios');
 var qs = require('qs');
+const { Int32 } = require('bson');
 
 exports.auth = async function (req, res) {
     try {
@@ -96,7 +97,7 @@ exports.loadPdf = async function (req, res) {
     let dataBuffer;
     if (!req.file) {
         const baseDir = path.dirname(__dirname);
-        dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604-2' + '.pdf');
+        dataBuffer = await fs.readFileSync(baseDir + '/assets/dayana' + '.pdf');
     }else{
         dataBuffer = req.file.buffer;
     }
@@ -104,11 +105,13 @@ exports.loadPdf = async function (req, res) {
     let data = await PDFParser(dataBuffer);
     let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
     let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
-    let mallaActual = req.file ? escuela+req.body.Year : escuela; 
+    let studentCode = Number (getStringBetween(data.text, "Universitario:", "\n").slice(2,6)) > 2018 ? "V2": "";
+    let mallaActual = req.file ? escuela+req.body.Year : escuela+studentCode; 
     let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
 
-    let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
-    matriculados.resp[0].nota ? matriculados.resp =[]: matriculados;
+    let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
+    if(matriculados.resp.length > 0) matriculados.resp[0] ? matriculados:matriculados.resp =[];
+   
     let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
     freeCourses.resp.forEach(item => {
         let isok = asignaturas.resp.find(item2 => item.type === item2.type);
@@ -367,19 +370,23 @@ async function getRemoteRecord(cookie, user) {
         const buffer = await GetRecordByFetch(cookie, user.username);
         let data = await PDFParser(buffer);
         let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
+        let studentCode = Number (getStringBetween(data.text, "Universitario:", "\n").slice(2,6)) > 2018 ? "V2": "";
+        let mallaActual = escuela+studentCode; 
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
-        let asignaturas = getCoursesByCode(data.text, util.curricula(escuela));
+        let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
+
         let ponderados = false;
 
-        let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
-        matriculados.resp[0].nota ? matriculados.resp =[]: matriculados;
+        let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
+        if(matriculados.resp.length > 0) matriculados.resp[0] ? matriculados:matriculados.resp =[];
+
         
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
         freeCourses.resp.forEach(item => {
             let isok = asignaturas.resp.find(item2 => item.type === item2.type);
             if (!isok) {
                 let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
-                let curso = util.cursoByType(escuela, item.type)
+                let curso = util.cursoByType(mallaActual, item.type)
                 let param = {
                     "nombre": curso.nombre,
                     "codigo": curso.codigo,
@@ -414,7 +421,7 @@ async function getRemoteRecord(cookie, user) {
             "EscuelaProfesional": escuela,
             "Alumno": getStringBetween(data.text, "Apellidos y Nombre:", "Código"),
             "Code": getStringBetween(data.text, "Universitario:", "\n"),
-            "TC": util.curriculaByCurso(escuela, 'TOTALCREDITS'),
+            "TC": util.curriculaByCurso(mallaActual, 'TOTALCREDITS'),
             "CA": approvedCredits,
             "CM": registeredCredits,
             "EC": asignaturas.electiveNumber,
