@@ -96,7 +96,7 @@ exports.loadPdf = async function (req, res) {
     let dataBuffer;
     if (!req.file) {
         const baseDir = path.dirname(__dirname);
-        dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604' + '.pdf');
+        dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604-2' + '.pdf');
     }else{
         dataBuffer = req.file.buffer;
     }
@@ -108,6 +108,7 @@ exports.loadPdf = async function (req, res) {
     let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
 
     let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
+    matriculados.resp[0].nota ? matriculados.resp =[]: matriculados;
     let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
     freeCourses.resp.forEach(item => {
         let isok = asignaturas.resp.find(item2 => item.type === item2.type);
@@ -371,6 +372,8 @@ async function getRemoteRecord(cookie, user) {
         let ponderados = false;
 
         let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(escuela));
+        matriculados.resp[0].nota ? matriculados.resp =[]: matriculados;
+        
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
         freeCourses.resp.forEach(item => {
             let isok = asignaturas.resp.find(item2 => item.type === item2.type);
