@@ -487,8 +487,13 @@ const CURRICULA = {
 };
 const ACT_LIBRES = {
   'L0006': { codigo: "L0006", nombre: "FUTBOL", creditos: "1", al: true, type: "FD" },
+  'L0009': { codigo: "L0009", nombre: "NATACION", creditos: "1", al: true, type: "FD" },
   'L0045': { codigo: "L0045", nombre: "INSTALACIONES ELECTRICAS DOMICILIARIAS", creditos: "1", al: true, type: "CC" },
   'L0051': { codigo: "L0051", nombre: "HOJA DE CALCULO (EXCEL)", creditos: "1", al: true, type: "CC" },
+  'L0041': { codigo: "L0041", nombre: "AJEDREZ", creditos: "1", al: true, type: "FD" },
+  'LI040061': { codigo: "LI040061", nombre: "ACTIVIDADES FISICAS BASICAS Y RECREATIVAS", creditos: "1", al: true, type: "FD" },
+  'L0147A': { codigo: "L0147A", nombre: "ACTIVIDADES FISICAS BASICAS Y RECREATIVAS", creditos: "1", al: true, type: "FD" },
+
 }
 const FACULTAD = {
   "FIIS": "INGENIERIA EN INFORMATICA Y SISTEMAS",

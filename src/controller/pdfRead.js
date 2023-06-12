@@ -29,6 +29,7 @@ exports.auth = async function (req, res) {
                         code: params.username,
                         password: params.usr,
                         facultad: record.Facultad,
+                        year:record.year,
                         admission: params.username.slice(2, 6),
                         ep: record.EscuelaProfesional,
                         tc: record.TC,
@@ -370,16 +371,15 @@ async function getRemoteRecord(cookie, user) {
         const buffer = await GetRecordByFetch(cookie, user.username);
         let data = await PDFParser(buffer);
         let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
-        let studentCode = Number (getStringBetween(data.text, "Universitario:", "\n").slice(2,6)) > 2018 ? "V2": "";
+        let year = getStringBetween(data.text, "Universitario:", "\n").slice(2,6);
+        let studentCode = Number (year) >= 2018 ? "V2": "";
         let mallaActual = escuela+studentCode; 
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
         let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
 
-        let ponderados = false;
-
         let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
-        if(matriculados.resp.length > 0) matriculados.resp[0] ? matriculados:matriculados.resp =[];
-
+        if(matriculados.resp[0].nota ) matriculados.resp =[];
+        console.log(matriculados);
         
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
         freeCourses.resp.forEach(item => {
@@ -411,6 +411,10 @@ async function getRemoteRecord(cookie, user) {
             return acumulador;
         }, 0);
 
+        if(asignaturas.electiveNumber > 4){
+            approvedCredits = approvedCredits - ((asignaturas.electiveNumber-4)*3);
+        }
+
         let registeredCredits = matriculados.resp.reduce((acumulador, actual) => {
             acumulador += actual.creditos * 1;
             return acumulador;
@@ -421,6 +425,7 @@ async function getRemoteRecord(cookie, user) {
             "EscuelaProfesional": escuela,
             "Alumno": getStringBetween(data.text, "Apellidos y Nombre:", "Código"),
             "Code": getStringBetween(data.text, "Universitario:", "\n"),
+            "year": year,
             "TC": util.curriculaByCurso(mallaActual, 'TOTALCREDITS'),
             "CA": approvedCredits,
             "CM": registeredCredits,
