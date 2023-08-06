@@ -146,7 +146,7 @@ const CURRICULA = {
     'IS030904': { codigo: "IS030904", nombre: "SEGURIDAD INFORMATICA II", creditos: "4", semestre: "9", type: "I" },
     'IS030905': { codigo: "IS030905", nombre: "DISEÑO DE INVESTIGACION II", creditos: "4", semestre: "9", type: "I" },
     'IS030906': { codigo: "IS030906", nombre: "ELECTIVO IV", creditos: "3", semestre: "9", type: "I", class: "E4" },
-    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I" },
+    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I", ppp:true},
 
     'IS031001': { codigo: "IS031001", nombre: "INNOVACION Y EMPRENDIMIENTO", creditos: "3", semestre: "10", type: "P" },
     'IS031002': { codigo: "IS031002", nombre: "CALIDAD DE PROCESOS DE SOFTWARE", creditos: "3", semestre: "10", type: "P" },
@@ -245,7 +245,7 @@ const CURRICULA = {
     'IS030904': { codigo: "IS030904", nombre: "SEGURIDAD INFORMATICA II", creditos: "4", semestre: "9", type: "I" },
     'IS030905': { codigo: "IS030905", nombre: "DISEÑO DE INVESTIGACION II", creditos: "4", semestre: "9", type: "I" },
     'IS030906': { codigo: "IS030906", nombre: "ELECTIVO IV", creditos: "3", semestre: "9", type: "I", class: "E4" },
-    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I" },
+    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I", ppp:true},
 
     'IS031001': { codigo: "IS031001", nombre: "INNOVACION Y EMPRENDIMIENTO", creditos: "3", semestre: "10", type: "P" },
     'IS031002': { codigo: "IS031002", nombre: "CALIDAD DE PROCESOS DE SOFTWARE", creditos: "3", semestre: "10", type: "P" },
@@ -344,7 +344,7 @@ const CURRICULA = {
     'IS030904': { codigo: "IS030904", nombre: "SEGURIDAD INFORMATICA II", creditos: "4", semestre: "9", type: "I" },
     'IS030905': { codigo: "IS030905", nombre: "DISEÑO DE INVESTIGACION II", creditos: "4", semestre: "9", type: "I" },
     'IS030906': { codigo: "IS030906", nombre: "ELECTIVO IV", creditos: "3", semestre: "9", type: "I", class: "E4" },
-    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I" },
+    'IS030907': { codigo: "IS030907", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "4", semestre: "9", type: "I", ppp:true },
 
     'IS031001': { codigo: "IS031001", nombre: "INNOVACION Y EMPRENDIMIENTO", creditos: "3", semestre: "10", type: "P" },
     'IS031002': { codigo: "IS031002", nombre: "CALIDAD DE PROCESOS DE SOFTWARE", creditos: "3", semestre: "10", type: "P" },
@@ -452,7 +452,7 @@ const CURRICULA = {
     'NIS1004': { codigo: "NIS1004", nombre: "DERECHO INFORMATICO", creditos: "3", semestre: "10", type: "P" },
     'NIS1005': { codigo: "NIS1005", nombre: "GESTION DEL CONOCIMIENTO", creditos: "3", semestre: "10", type: "P" },
     'NIS1006': { codigo: "NIS1006", nombre: "DEONTOLOGIA PROFESIONAL", creditos: "2", semestre: "10", type: "P" },
-    'NIS1011': { codigo: "NIS1011", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "3", semestre: "10", type: "P" },
+    'NIS1011': { codigo: "NIS1011", nombre: "PRACTICAS PRE PROFESIONALES", creditos: "3", semestre: "10", type: "P", ppp:true },
 
     'NEIS01': { codigo: "NEIS01", nombre: "REDES Y CONECTIVIDAD I", creditos: "2", electivo: true, type: "I" },
     'NEIS02': { codigo: "NEIS02", nombre: "REDES Y CONECTIVIDAD II", creditos: "2", electivo: true, type: "I" },

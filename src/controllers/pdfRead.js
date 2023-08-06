@@ -36,7 +36,8 @@ exports.auth = async function (req, res) {
                         ca: record.CA,
                         cm: record.CM,
                         ea: record.EC,
-                        ala: 0
+                        ala: 0,
+                        PPP: record.PPP,
                     }
                     let saved = await credentialModel.create(userInfo);
                     let response = saved;
@@ -307,7 +308,9 @@ async function GetRecordByFetch(cookie, code) {
 }
 
 async function authOcdaApi(user, cookie) {
-    var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
+    //var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
+    var data = 'username=' + user.username + '&userpasw=' + user.usr + '&captcha=' + user.captcha;
+
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
@@ -374,12 +377,12 @@ async function getRemoteRecord(cookie, user) {
         let year = getStringBetween(data.text, "Universitario:", "\n").slice(2,6);
         let studentCode = Number (year) >= 2018 ? "V2": "";
         let mallaActual = escuela+studentCode; 
+        let pppCourse = Object.values(util.curricula(mallaActual)).find(elemento => elemento.ppp === true);
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
         let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
-
+        let pppStatus =  asignaturas.resp.find(asign => pppCourse.codigo === asign.codigo) ? pppCourse.creditos + "-" + pppCourse.creditos: 0 + "-" + pppCourse.creditos;
         let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
-        if(matriculados.resp[0].nota ) matriculados.resp =[];
-        console.log(matriculados);
+        if(matriculados.resp[0].nota > 0) matriculados.resp =[];
         
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
         freeCourses.resp.forEach(item => {
@@ -430,6 +433,7 @@ async function getRemoteRecord(cookie, user) {
             "CA": approvedCredits,
             "CM": registeredCredits,
             "EC": asignaturas.electiveNumber,
+            "PPP": pppStatus,
             "Asignaturas": asignaturas.resp
         }
         let saved = await recordModel.create(response);

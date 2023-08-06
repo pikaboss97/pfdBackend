@@ -46,7 +46,11 @@ const CredentialSchema = new mongoose.Schema({
     ala: {
         type: Number,
         required: true,
-    }
+    },
+    PPP: {
+        type: String,
+        required: true,
+    },
 },
 {
     versionKey:false,

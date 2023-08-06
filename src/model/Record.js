@@ -38,6 +38,10 @@ const RecordSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    PPP: {
+        type: String,
+        required: true,
+    },
     Asignaturas: [{
         nombre: {
             type: String,
