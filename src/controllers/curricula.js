@@ -5,13 +5,19 @@ const cheerio = require('cheerio')
 
 
 exports.getCurricula = function (req, res) {
-    let version = Number (req.query.v) >= 2018 ? "V2": "";
+  try {
+    let version = Number(req.query.v) >= 2018 ? "V2" : "";
     let escuela = util.getFacultadByEP(req.query.ep);
-    escuela = req.query.ep == "FIIS" ? escuela + version: escuela;
+    escuela = req.query.ep == "FIIS" ? escuela + version : escuela;
     let curricula = util.curricula(escuela);
+    if(curricula == 'ESCUELA NO REGISTRADA') throw curricula;
     let resp = responseFormat(curricula);
     res.send(resp);
-}
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+};
 
 exports.getAllCurriculas = function (req, res) {
     let resp = {

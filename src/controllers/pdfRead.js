@@ -96,7 +96,8 @@ exports.getCookie = async function (req, res) {
 }
 
 exports.loadPdf = async function (req, res) {
-    let dataBuffer;
+    try {
+        let dataBuffer;
     if (!req.file) {
         const baseDir = path.dirname(__dirname);
         dataBuffer = await fs.readFileSync(baseDir + '/assets/dayana' + '.pdf');
@@ -108,7 +109,8 @@ exports.loadPdf = async function (req, res) {
     let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
     let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
     let studentCode = Number (getStringBetween(data.text, "Universitario:", "\n").slice(2,6)) > 2018 ? "V2": "";
-    let mallaActual = req.file ? escuela+req.body.Year : escuela+studentCode; 
+
+    let mallaActual = !req.file ? escuela+req.body.Year : escuela+studentCode; 
     let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
 
     let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
@@ -184,6 +186,8 @@ exports.loadPdf = async function (req, res) {
     }
     //let saved = await recordModel.create(response);
     //console.log(saved);
+    res.send(response);
+/* 
     if(req.file){
         const excelFile = convert.jsonToExcel(asignaturas.resp)
         let filename = response.Alumno.replace(" ","_");
@@ -192,7 +196,10 @@ exports.loadPdf = async function (req, res) {
     }else{
         res.send(response);
     }
-   
+   */
+    } catch (error) {
+        res.status(500).send(error);
+    }
 }
 
 function getCoursesByCode(record, cursos) {

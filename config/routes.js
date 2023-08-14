@@ -18,7 +18,7 @@ module.exports = function (app) {
     app.get('/getUser',pdfReader.getUserData);
     app.get('/cookie',pdfReader.getCookie);
     app.get('/traer',curricula.getAllCareer)
-    app.post('/upload', upload.single('pdfFile'),pdfReader.loadPdf);
+    app.post('/record', upload.single('pdfFile'),pdfReader.loadPdf);
     
     //app.get('/getPdf', pdfReader.getPdf);
 }

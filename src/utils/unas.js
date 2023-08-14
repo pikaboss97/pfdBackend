@@ -507,8 +507,12 @@ exports.curriculaByCurso = function (escuela, curso, year = 2018) {
   return CURRICULA[escuela][curso];
 }
 exports.curricula = function (escuela) {
-  if (!CURRICULA[escuela]) return "ESCUELA NO REGISTRADA";
-  return CURRICULA[escuela];
+  try {
+    if (!CURRICULA[escuela])  throw  "ESCUELA NO REGISTRADA";
+    return CURRICULA[escuela];
+  } catch (error) {
+    return error;
+  }
 }
 exports.getFacultadByEP = function (escuela) {
   if (!FACULTAD[escuela]) return "ESCUELA NO REGISTRADA";
