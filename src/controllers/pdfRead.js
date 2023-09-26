@@ -100,20 +100,30 @@ exports.loadPdf = async function (req, res) {
         let dataBuffer;
     if (!req.file) {
         const baseDir = path.dirname(__dirname);
-        dataBuffer = await fs.readFileSync(baseDir + '/assets/dayana' + '.pdf');
+        dataBuffer = await fs.readFileSync(baseDir + '/assets/0020160604-2' + '.pdf');
     }else{
         dataBuffer = req.file.buffer;
     }
 
     let data = await PDFParser(dataBuffer);
+
     let escuela = getStringBetween(data.text, "Escuela Profesional:", "\n");
-    let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
     let studentCode = Number (getStringBetween(data.text, "Universitario:", "\n").slice(2,6)) > 2018 ? "V2": "";
+    let mallaActual = escuela+studentCode; 
+    let malla = util.curricula(mallaActual);
+    let semestres = getStringBetween(data.text, "N°", "\n", "g");
 
-    let mallaActual = !req.file ? escuela+req.body.Year : escuela+studentCode; 
-    let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
+    let avanceCurricular = getCoursesBySemester(data.text, semestres, malla);
 
-    let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
+    console.log(avanceCurricular);
+res.send(avanceCurricular)
+
+    let asignaturas = getCoursesByCode(data.text, malla);
+
+
+
+
+    let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), malla);
     if(matriculados.resp.length > 0) matriculados.resp[0] ? matriculados:matriculados.resp =[];
    
     let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
@@ -141,7 +151,7 @@ exports.loadPdf = async function (req, res) {
     });
 
     if(req.file){
-        Object.keys(util.curricula(mallaActual)).forEach(curso => {
+        Object.keys(malla).forEach(curso => {
             const cursos = asignaturas.resp.find(item => curso === item.codigo);
             if(!cursos){
                 let cursoOfCurricula = util.curriculaByCurso(mallaActual,curso);
@@ -186,7 +196,7 @@ exports.loadPdf = async function (req, res) {
     }
     //let saved = await recordModel.create(response);
     //console.log(saved);
-    res.send(response);
+    //res.send(response);
 /* 
     if(req.file){
         const excelFile = convert.jsonToExcel(asignaturas.resp)
@@ -199,6 +209,133 @@ exports.loadPdf = async function (req, res) {
    */
     } catch (error) {
         res.status(500).send(error);
+    }
+}
+
+function getCoursesBySemester(record, semestres, malla){
+    
+    let response = [];
+    let cursos;
+    for (let i = 0; i < semestres.length; i++) {
+      let semestre = semestres[i];
+      if (i != semestres.length-1) {
+        let semestreText = getStringBetween(record,"N°" + semestre,"N°" + semestres[i + 1],"s");
+        cursos = getCoursesByCodeV2(semestreText, malla);
+        response.push(formatSemesterResponse(semestre, cursos));
+      }else {
+        cursos = getCoursesByCodeV2(getStringBetween(record,"N°" + semestre,"Universidad Nacional Agraria de la Selva","s"), malla);
+        response.push(formatSemesterResponse(semestre, cursos));
+
+      }
+    }
+    return response;
+}
+
+function formatSemesterResponse(semestre, cursos){
+    let numeros = semestre.match(/\d+/); //obtiene todos los numeros del semestre
+    let response = {
+        "N°": numeros[0],
+        "semestre": getStringBetween(semestre,numeros[0],"Matriculado"),
+        "estado": "Matriculado",
+        "creditos_cursados": cursos.stats.coursedCredits,
+        "creditos_aprobados":cursos.stats.approvedCredits,
+        "puntos_por_semestre":cursos.stats.pointsPerSemester,
+        "promedio_ponderado_semestral":"",
+        "total_creditos_cursados":"",
+        "total_creditos_aprobados": "",
+        "total_puntos_acumulados":"",
+        "promedio_ponderado_acumulado":"",
+        "condicion":"",
+        "cursos":cursos.resp
+    };
+    return response;
+
+}
+function getCoursesByCodeV2(record, cursos) {
+    const freeCoursesList = util.getFreeCourses();
+    let resp = [];
+    let stats = {
+        coursedCredits:0,
+        approvedCredits:0,
+        electiveNumber:0,
+        pointsPerSemester:0,
+        ponderado_semestral:0
+
+    };
+    try {
+        Object.keys(cursos).forEach(curso => {
+
+            let asign = getStringBetween(record, curso, "\n", "g") ?? '';
+
+            if (asign) {
+                asign.map((e) => {
+                  let puntos = e.match(new RegExp("/20" + "(.*)" + "     "))[1].slice(4);
+                  let response = {
+                    codigo: curso,
+                    nombre: cursos[curso].nombre,
+                    num_desaprobado: "[1]",
+                    fecha_examen: "20/07/1997",
+                    horas_teoricas: "2",
+                    horas_practicas: "2",
+                    creditos: puntos[0],
+                    nota: getCalification(puntos),
+                    nota_por_creditos: puntos[0] * getCalification(puntos),
+                    electivo: cursos[curso].electivo ? true : false,
+                    aprobado: getCalification(puntos) > 10 ? true : false,
+                  };
+
+                  stats.coursedCredits += puntos[0]*1;
+                  if (getCalification(puntos) > 10) stats.approvedCredits += puntos[0]*1;
+                  if (cursos[curso].electivo && getCalification(puntos) > 10) stats.electiveNumber++;
+                  if (cursos[curso].al || cursos[curso].cat) {
+                    response.libre = true;
+                    response.type = cursos[curso].cat
+                      ? cursos[curso].cat
+                      : cursos[curso].type;
+                  }
+                  stats.pointsPerSemester += response.nota_por_creditos;
+                  resp.push(response);
+                });
+            }
+        });
+
+
+        Object.keys(freeCoursesList).forEach(libre => {
+            let freeCourse = getStringBetween(record, libre, "\n", "g") ?? '';
+            if(freeCourse){
+                freeCourse.map((e) => {
+                    let puntos = e.match(new RegExp("/20" + "(.*)" + "     "))[1].slice(4);
+                    let response = {
+                      codigo: libre,
+                      nombre: freeCoursesList[libre].nombre,
+                      num_desaprobado: "[1]",
+                      fecha_examen: "20/07/1997",
+                      horas_teoricas: "0",
+                      horas_practicas: "2",
+                      creditos: puntos[0],
+                      nota: getCalification(puntos),
+                      nota_por_creditos: puntos[0] * getCalification(puntos),
+                      electivo: false,
+                      aprobado: getCalification(puntos) > 10 ? true : false,
+                      libre: true,
+                      tipo: freeCoursesList[libre].type,
+                    };
+  
+                    stats.coursedCredits += puntos[0]*1;
+                    if (getCalification(puntos) > 10) stats.approvedCredits += puntos[0]*1;
+                    stats.pointsPerSemester += response.nota_por_creditos;
+                    resp.push(response);
+                  });
+            }
+
+        })
+
+
+        return { resp, stats };
+
+    } catch (error) {
+        console.log(error);
+        return { resp, electiveNumber }
     }
 }
 
@@ -258,7 +395,7 @@ function getCalification(values) {
 function getStringBetween(str, start, end, isglobal = false) {
     try {
         let result = [];
-        if (isglobal) {
+        if (isglobal == "g") {
             //if(start == 'L0006')console.log(str);
             for (const match of str.matchAll(new RegExp(`${start}(.*)${end}`, isglobal))) {
                 if (match && match[1].length == 0) {
@@ -276,9 +413,11 @@ function getStringBetween(str, start, end, isglobal = false) {
                     result.push(match[1])
                 }
             }
+        }else if(isglobal == "s"){
+            result = str.match(new RegExp(`${start}(.*)${end}`, "s"))[1];
         } else {
-            //console.log(str.match(new RegExp(`${start}(.*)${end}`)));
             result = str.match(new RegExp(`${start}(.*)${end}`))[1];
+
         }
         return result;
     } catch (error) {

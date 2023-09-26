@@ -8,17 +8,13 @@ exports.auth = async function (userData) {
   try {
     let response;
     let authInOcda = await apiRequests.authInOcda(userData);
-    if (authInOcda == "API_AUTH_ERROR") throw authInOcda;
+    if (!authInOcda.logged) throw authInOcda;
     const user = await authlModel.findOne({ code: params.username });
-    if (user) {
-      const userInfo = await userRepository.getuserDataById(user.userId);
-      response = {
-        token: await authRepository.updateToken(user),
-      };
-    } else {
-
+    if (user) response = {token: await authRepository.updateToken(user)};
+    else {
+      console.log("usuario existente pero sin data");
+      response = "usuario existente pero sin data";
     }
-
     return response;
   } catch (error) {
     console.log("Error al iniciar sesion: ", error);
@@ -26,4 +22,6 @@ exports.auth = async function (userData) {
   }
 };
 
-exports.saveUser = async function (user) {};
+exports.saveUser = async function (user) {
+
+};

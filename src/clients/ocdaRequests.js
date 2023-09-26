@@ -1,6 +1,11 @@
+var axios = require('axios');
+var util = require('../utils/functions');
+
 exports.authInOcda = async function (userData){
 
-    var data = 'username=' + userData.username + '&userpasw=%242y%2447%249%40J' + userData.password + 'L&captcha=' + userData.captcha;
+    //var data = 'username=' + userData.username + '&userpasw=%242y%2447%249%40J' + userData.password + 'L&captcha=' + userData.captcha;
+    var data = 'username=' + userData.username + '&userpasw=' + userData.password + '&captcha=' + userData.captcha;
+
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
@@ -22,9 +27,10 @@ exports.authInOcda = async function (userData){
     };
     try {
         const response = await axios(config);
+        console.log(response);
         if (!response.data.login) throw new Error('no login');
         const headers = response.headers['set-cookie'];
-        return getStringBetween(headers[0], "SGASID=", "; path");
+        return {logged: util.getStringBetween(headers[0], "SGASID=", "; path")};
     } catch (error) {
         console.log("Error al iniciar sesion en OCDA: ", error);
         return "API_AUTH_ERROR";

@@ -2,6 +2,7 @@ const multer = require('multer')
 const upload = multer();
 var pdfReader = require('../src/controllers/pdfRead');
 var curricula = require('../src/controllers/curricula');
+var auth = require('../src/controllers/authController')
 
 module.exports = function (app) {
 
@@ -21,4 +22,6 @@ module.exports = function (app) {
     app.post('/record', upload.single('pdfFile'),pdfReader.loadPdf);
     
     //app.get('/getPdf', pdfReader.getPdf);
+
+    app.post('/testAuth', auth.auth)
 }

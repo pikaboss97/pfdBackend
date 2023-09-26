@@ -3,10 +3,11 @@ const authlModel = require("../model/Auth");
 require("dotenv").config();
 
 exports.saveToken = async function (user) {};
+
 exports.updateToken = async function (user) {
   try {
     let newToken = this.generateToken(user);
-    const responseData = await authlModel.findByIdAndUpdate({userId: user.userId}, {userToken: newToken});
+    const responseData = await authlModel.findByIdAndUpdate({userId: user.userId}, {userToken: newToken, loginDate: new Date()});
   } catch (error) {
     return error;
   }
