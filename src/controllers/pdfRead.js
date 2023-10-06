@@ -4,6 +4,7 @@ const util = require('../utils/unas');
 const convert = require('../utils/functions');
 const recordModel = require('../model/Record');
 const credentialModel = require('../model/Credentials')
+const HtmlTableToJson = require('html-table-to-json');
 const fs = require('fs');
 var axios = require('axios');
 var qs = require('qs');
@@ -17,12 +18,15 @@ exports.auth = async function (req, res) {
         if (auth) {
             const data = await credentialModel.findOne({ code: params.username })
             if (data) {
+                //let student = await getRemoteStudentData(auth);
                 delete data.password;
                 res.status(200).send(data);
             }
             else {
                 try {
-                    //let data = await getRemoteStudentData(auth)
+                    let student = await getRemoteStudentData(auth);
+                    if (student.ep != "INGENIERIA EN INFORMATICA Y SISTEMAS") throw "EP-NOT-ALLOWED";
+                    if (student.curricula.match(/^[^\s]+/)[0] != "EPIIS2018") throw "CURRICULA-NOT-ALLOWED";
                     let record = await getRemoteRecord(auth, params)
                     let userInfo = {
                         username: record.Alumno,
@@ -32,6 +36,9 @@ exports.auth = async function (req, res) {
                         year:record.year,
                         admission: params.username.slice(2, 6),
                         ep: record.EscuelaProfesional,
+                        curricula: student.curricula.match(/^[^\s]+/)[0],
+                        ponderadoS: student.semestralAverage,
+                        ponderadoA: student.anualAverage,
                         tc: record.TC,
                         ca: record.CA,
                         cm: record.CM,
@@ -45,7 +52,7 @@ exports.auth = async function (req, res) {
                     res.status(200).send(response);
                 } catch (error) {
                     console.log(error);
-                    res.status(500).send({ msg: 'SAVE_INFO_ERROR' });
+                    res.status(423).send({ msg: error.msg });
                 }
             }
         } else {
@@ -116,7 +123,7 @@ exports.loadPdf = async function (req, res) {
     let avanceCurricular = getCoursesBySemester(data.text, semestres, malla);
 
     console.log(avanceCurricular);
-res.send(avanceCurricular)
+    res.send(avanceCurricular)
 
     let asignaturas = getCoursesByCode(data.text, malla);
 
@@ -353,9 +360,13 @@ function getCoursesByCode(record, cursos) {
                         resp.map((c) => {
                             if (c.codigo === duplicate.codigo) {
                                 c.nota = [...c.nota, getCalification(puntos)];
-                                c.aprobado = getCalification(puntos) > 10 ? true : false,
-                                    c.electivo = cursos[curso].electivo ? true : false
+                                c.aprobado = getCalification(puntos) > 10 ? true : false;
+                                c.electivo = cursos[curso].electivo ? true : false;
+                                if (cursos[curso].electivo && getCalification(puntos) > 10){
+                                    electiveNumber++;
+                                }
                             }
+
                             return c;
                         })
                     } else {
@@ -367,7 +378,9 @@ function getCoursesByCode(record, cursos) {
                             "aprobado": getCalification(puntos) > 10 ? true : false,
                             "nota": getCalification(puntos),
                         }
-                        if (cursos[curso].electivo && getCalification(puntos) > 10) electiveNumber++;
+                        if (cursos[curso].electivo && getCalification(puntos) > 10){
+                            electiveNumber++;
+                        } 
                         if (cursos[curso].al || cursos[curso].cat) {
                             response.libre = true;
                             response.type = cursos[curso].cat ? cursos[curso].cat : cursos[curso].type
@@ -456,28 +469,29 @@ async function GetRecordByFetch(cookie, code) {
 async function authOcdaApi(user, cookie) {
     //var data = 'username=' + user.username + '&userpasw=%242y%2447%249%40J' + user.password + 'L&captcha=' + user.captcha;
     var data = 'username=' + user.username + '&userpasw=' + user.usr + '&captcha=' + user.captcha;
-
     var config = {
         method: 'post',
         url: 'https://academico.unas.edu.pe/login',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Accept-Language': 'es-419,es;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Host': 'academico.unas.edu.pe',
-            'Origin': 'https://academico.unas.edu.pe',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15',
-            'Connection': 'keep-alive',
-            'Referer': 'https://academico.unas.edu.pe/login',
-            'Content-Length': '127',
-            'Cookie': 'SGASID=' + cookie,
-            'X-Requested-With': 'XMLHttpRequest'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0', 
+            'Accept': 'application/json, text/javascript, */*; q=0.01', 
+            'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3', 
+            'Accept-Encoding': 'gzip, deflate, br', 
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 
+            'X-Requested-With': 'XMLHttpRequest', 
+            'Origin': 'https://academico.unas.edu.pe', 
+            'Connection': 'keep-alive', 
+            'Referer': 'https://academico.unas.edu.pe/login', 
+            'Cookie': '_ga=GA1.3.1933063879.1683562570; _ga_1M9SJETZ2K=GS1.1.1688164978.2.0.1688164978.60.0.0; _ga_0LF75RCN2N=GS1.3.1692120743.4.0.1692120743.0.0.0; _ga_RY1QMTE0D9=GS1.1.1695764912.3.1.1695786940.59.0.0; _gid=GA1.3.680243158.1695764913; SGASID=' + cookie + '; SGASID='+ cookie +';', 
+            'Sec-Fetch-Dest': 'empty', 
+            'Sec-Fetch-Mode': 'cors', 
+            'Sec-Fetch-Site': 'same-origin'
         },
         data: data
     };
     try {
         const response = await axios(config);
+        
         if (!response.data.login) throw new Error('no login');
         const headers = response.headers['set-cookie'];
         return getStringBetween(headers[0], "SGASID=", "; path");
@@ -489,25 +503,38 @@ async function getRemoteStudentData(cookie) {
     try {
         var config = {
             method: 'get',
-            url: 'https://academico.unas.edu.pe/alumno',
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Pragma': 'no-cache',
-                'Cookie': '_ga=GA1.3.1977725257.1682133790; _gid=GA1.3.1927325883.1682133790; SGASID=' + cookie,
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Cache-Control': 'no-cache',
-                'Host': 'academico.unas.edu.pe',
-                'Accept-Language': 'es-419,es;q=0.9',
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15',
-                'Referer': 'https://academico.unas.edu.pe/',
-                'Connection': 'keep-alive'
+            url: 'https://academico.unas.edu.pe/',
+            headers: { 
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0', 
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8', 
+              'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3', 
+              'Accept-Encoding': 'gzip, deflate, br', 
+              'Connection': 'keep-alive', 
+              'Referer': 'https://academico.unas.edu.pe/login', 
+              'Cookie': '_ga=GA1.3.1933063879.1683562570; _ga_1M9SJETZ2K=GS1.1.1688164978.2.0.1688164978.60.0.0; _ga_0LF75RCN2N=GS1.3.1692120743.4.0.1692120743.0.0.0; _ga_RY1QMTE0D9=GS1.1.1696022803.6.1.1696022839.24.0.0; _gid=GA1.3.1029263032.1695944095; _gat_gtag_UA_34189061_1=1; SGASID='+cookie, 
+              'Upgrade-Insecure-Requests': '1', 
+              'Sec-Fetch-Dest': 'document', 
+              'Sec-Fetch-Mode': 'navigate', 
+              'Sec-Fetch-Site': 'same-origin', 
+              'Sec-Fetch-User': '?1'
             }
-        };
+          };
         const response = await axios(config);
         if (!response.data) throw new Error('no student data');
-        console.log(response.data);
-        return true;
-        //return getStringBetween(response.data, "SGASID=", "; path");
+        let tableData = response.data.match(/<tbody>([\s\S]*?)<\/tbody>/g)[0];
+        let jsonTables = HtmlTableToJson.parse("<table> "+tableData+" </table>");
+        let studentInfo = jsonTables.results[0].map(objeto => Object.values(objeto)[1]);
+        if (studentInfo.length == 0) throw new Error('no table decode data');
+        let resp = {
+            ep: studentInfo[0],
+            code: studentInfo[1],
+            curricula: studentInfo[2].replace(/\t/g, '').replace(/\n/g, ' '),
+            lastSemester: studentInfo[3].replace(/\t/g, '').replace(/\n/g, ' '),
+            semestralAverage: studentInfo[4],
+            anualAverage: studentInfo[5],
+            studentState: studentInfo[6].replace(/\t/g, '').replace(/\n/g, ' ') 
+        }
+        return resp;
     } catch (error) {
         console.log(error);
         return null;
@@ -529,6 +556,10 @@ async function getRemoteRecord(cookie, user) {
         let pppStatus =  asignaturas.resp.find(asign => pppCourse.codigo === asign.codigo) ? pppCourse.creditos + "-" + pppCourse.creditos: 0 + "-" + pppCourse.creditos;
         let matriculados = getCoursesByCode(data.text.substring(data.text.indexOf(semestres[semestres.length - 1])), util.curricula(mallaActual));
         if(matriculados.resp[0].nota > 0) matriculados.resp =[];
+
+        //let listSemestres = getStringBetween(data.text, "N°", "\n", "g");
+        //let avanceCurricular = getCoursesBySemester(data.text, listSemestres, util.curricula(mallaActual));
+        //console.log(avanceCurricular);
         
         let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
         freeCourses.resp.forEach(item => {

@@ -23,9 +23,25 @@ const CredentialSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
+    admission:{
+        type: String,
+        required: false
+    },
     ep: {
         type: String,
         required: true,
+    },
+    curricula: {
+        type: String,
+        required: true
+    },
+    ponderadoS: {
+        type: String,
+        required: true
+    },
+    ponderadoA: {
+        type: String,
+        required: true
     },
     tc: {
         type: Number,
