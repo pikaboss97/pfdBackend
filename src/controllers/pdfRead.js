@@ -16,9 +16,26 @@ exports.auth = async function (req, res) {
         let cookie = req.body.cookie;
         let auth = await authOcdaApi(params, cookie);
         if (auth) {
-            const data = await credentialModel.findOne({ code: params.username })
+            let data = await credentialModel.findOne({ code: params.username })
             if (data) {
-                //let student = await getRemoteStudentData(auth);
+                let student = await getRemoteStudentData(auth);
+                if(student.lastSemester.match(/\d{4}-\d{1}/)[0] != data.currentSemester){
+                    console.log("------Is new Data-----");
+                    let record = await getRemoteRecord(auth, params);
+                    let newUserInfo = {
+                        currentSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
+                        curricula: student.curricula.match(/^[^\s]+/)[0],
+                        ponderadoS: student.semestralAverage,
+                        ponderadoA: student.anualAverage,
+                        tc: record.TC,
+                        ca: record.CA,
+                        cm: record.CM,
+                        ea: record.EC,
+                        ala: 0,
+                        PPP: record.PPP
+                    }
+                    data = await credentialModel.findOneAndUpdate({ code: params.username }, newUserInfo);
+                }
                 delete data.password;
                 res.status(200).send(data);
             }
@@ -34,6 +51,7 @@ exports.auth = async function (req, res) {
                         password: params.usr,
                         facultad: record.Facultad,
                         year:record.year,
+                        currentSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
                         admission: params.username.slice(2, 6),
                         ep: record.EscuelaProfesional,
                         curricula: student.curricula.match(/^[^\s]+/)[0],
@@ -613,7 +631,7 @@ async function getRemoteRecord(cookie, user) {
             "PPP": pppStatus,
             "Asignaturas": asignaturas.resp
         }
-        let saved = await recordModel.create(response);
+        let saved = await recordModel.findOneAndUpdate({ Code: response.Code },{ $set: response },{ upsert: true, new: true });
         return saved;
     } catch (error) {
         console.log(error);

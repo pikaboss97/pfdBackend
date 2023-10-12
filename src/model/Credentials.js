@@ -27,6 +27,10 @@ const CredentialSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    currentSemester: {
+        type: String,
+        required: true,
+    },
     ep: {
         type: String,
         required: true,
