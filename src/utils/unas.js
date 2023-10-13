@@ -110,7 +110,7 @@ const CURRICULA = {
     'IS030404': { codigo: "IS030404", nombre: "SISTEMAS OPERATIVOS II", creditos: "4", req: ["IS030304"], semestre: "4", type: "P" },
     'IS030405': { codigo: "IS030405", nombre: "PENSAMIENTO SISTEMICO", creditos: "4", req: ["IS030103", "60 creditos"], semestre: "4", type: "P" },
 
-    'BI010104': { codigo: "BI010104", nombre: "ESTADISTICA GENERAL", creditos: "4", semestre: "5", type:"I" },
+    'BI010104': { codigo: "BI010104", nombre: "ESTADISTICA GENERAL", creditos: "4", req: ["BI010201"], semestre: "5", type:"I" },
     //'IS030505': { codigo: "IS030505", nombre: "ESTADISTICA Y PROBABILIDADES", creditos: "4", req: ["IS030201"], semestre: "5", type: "i" },
     'IS030501': { codigo: "IS030501", nombre: "COSTOS Y PRESUPUESTOS EN TI", creditos: "4", req: ["BI010101"], semestre: "5", type: "I" },
     'IS030502': { codigo: "IS030502", nombre: "GESTION DE BASE DE DATOS", creditos: "4", req: ["IS030204", "IS030402"], semestre: "5", type: "I" },

@@ -5,6 +5,7 @@ const convert = require('../utils/functions');
 const recordModel = require('../model/Record');
 const credentialModel = require('../model/Credentials')
 const HtmlTableToJson = require('html-table-to-json');
+const cheerio = require('cheerio');
 const fs = require('fs');
 var axios = require('axios');
 var qs = require('qs');
@@ -16,14 +17,19 @@ exports.auth = async function (req, res) {
         let cookie = req.body.cookie;
         let auth = await authOcdaApi(params, cookie);
         if (auth) {
-            let data = await credentialModel.findOne({ code: params.username })
+            let data = await credentialModel.findOne({ code: params.username });
+            let semesterData = await getRemoteSemesterStudentData(auth);
+            let student = await getRemoteStudentData(auth);
             if (data) {
-                let student = await getRemoteStudentData(auth);
-                if(student.lastSemester.match(/\d{4}-\d{1}/)[0] != data.currentSemester){
+                if(semesterData.semactivo != data.currentSemester){
                     console.log("------Is new Data-----");
                     let record = await getRemoteRecord(auth, params);
                     let newUserInfo = {
-                        currentSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
+                        currentSemester: semesterData.semactivo,
+                        lastSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
+                        estado: semesterData.estado,
+                        semesterProgress: semesterData.progreso,
+                        semesterEnd: semesterData.finSemestre,
                         curricula: student.curricula.match(/^[^\s]+/)[0],
                         ponderadoS: student.semestralAverage,
                         ponderadoA: student.anualAverage,
@@ -41,7 +47,6 @@ exports.auth = async function (req, res) {
             }
             else {
                 try {
-                    let student = await getRemoteStudentData(auth);
                     if (student.ep != "INGENIERIA EN INFORMATICA Y SISTEMAS") throw "EP-NOT-ALLOWED";
                     if (student.curricula.match(/^[^\s]+/)[0] != "EPIIS2018") throw "CURRICULA-NOT-ALLOWED";
                     let record = await getRemoteRecord(auth, params)
@@ -51,7 +56,11 @@ exports.auth = async function (req, res) {
                         password: params.usr,
                         facultad: record.Facultad,
                         year:record.year,
-                        currentSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
+                        currentSemester: semesterData.semactivo,
+                        lastSemester: student.lastSemester.match(/\d{4}-\d{1}/)[0],
+                        estado: semesterData.estado,
+                        semesterProgress: semesterData.progreso,
+                        semesterEnd: semesterData.finSemestre,
                         admission: params.username.slice(2, 6),
                         ep: record.EscuelaProfesional,
                         curricula: student.curricula.match(/^[^\s]+/)[0],
@@ -517,6 +526,7 @@ async function authOcdaApi(user, cookie) {
         return null;
     }
 }
+
 async function getRemoteStudentData(cookie) {
     try {
         var config = {
@@ -559,6 +569,49 @@ async function getRemoteStudentData(cookie) {
     }
 }
 
+async function getRemoteSemesterStudentData(cookie) {
+    try {
+        var config = {
+            method: 'post',
+            url: 'https://academico.unas.edu.pe/',
+            headers: { 
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/118.0', 
+              'Accept': 'text/html, */*; q=0.01', 
+              'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3', 
+              'Accept-Encoding': 'gzip, deflate, br', 
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 
+              'X-Requested-With': 'XMLHttpRequest', 
+              'Origin': 'https://academico.unas.edu.pe', 
+              'Connection': 'keep-alive', 
+              'Referer': 'https://academico.unas.edu.pe/alumno', 
+              'Cookie': '_ga=GA1.3.1933063879.1683562570; _ga_1M9SJETZ2K=GS1.1.1688164978.2.0.1688164978.60.0.0; _ga_0LF75RCN2N=GS1.3.1697055741.6.1.1697057293.0.0.0; _ga_RY1QMTE0D9=GS1.1.1697136891.20.1.1697137123.41.0.0; _gid=GA1.3.640429247.1696718436; _gat_gtag_UA_34189061_1=1; SGASID='+cookie, 
+              'Sec-Fetch-Dest': 'empty', 
+              'Sec-Fetch-Mode': 'cors', 
+              'Sec-Fetch-Site': 'same-origin'
+            },
+            data : 'load=SemesterController%40show'
+          };
+          
+        const response = await axios(config);
+        if (!response.data) throw new Error('no student semester data');
+        const $ = cheerio.load(response.data);
+        const spanSemActivo = $('#semactivo').text();
+        const estado = $('.float-end strong').text();
+        const progresoDelSemestre = $('.dropdown-item').eq(2).find('.float-end').text();
+        const finDeSemestre = $('.dropdown-item').eq(4).find('.float-end strong').text();
+        let resp = {
+            semactivo: spanSemActivo.trim(),
+            estado: estado.replace(/[^a-zA-Z]/g, ' ').trim(),
+            progreso: progresoDelSemestre.trim(),
+            finSemestre: finDeSemestre.trim()
+        }
+        return resp;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 async function getRemoteRecord(cookie, user) {
     try {
         const baseDir = path.dirname(__dirname);
@@ -569,6 +622,8 @@ async function getRemoteRecord(cookie, user) {
         let studentCode = Number (year) >= 2018 ? "V2": "";
         let mallaActual = escuela+studentCode; 
         let pppCourse = Object.values(util.curricula(mallaActual)).find(elemento => elemento.ppp === true);
+        let freeCourses = {fisicoDeportivo: false, civicoComunitario: false, artisticoCultural: false, freeCoursesCursed: 0}
+        let curriculaFreeCoursesNumber = 3;
         let semestres = getStringBetween(data.text, "N°", "Matriculado", "g");
         let asignaturas = getCoursesByCode(data.text, util.curricula(mallaActual));
         let pppStatus =  asignaturas.resp.find(asign => pppCourse.codigo === asign.codigo) ? pppCourse.creditos + "-" + pppCourse.creditos: 0 + "-" + pppCourse.creditos;
@@ -579,24 +634,53 @@ async function getRemoteRecord(cookie, user) {
         //let avanceCurricular = getCoursesBySemester(data.text, listSemestres, util.curricula(mallaActual));
         //console.log(avanceCurricular);
         
-        let freeCourses = getCoursesByCode(data.text, util.getFreeCourses());
-        freeCourses.resp.forEach(item => {
-            let isok = asignaturas.resp.find(item2 => item.type === item2.type);
-            if (!isok) {
-                let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
-                let curso = util.cursoByType(mallaActual, item.type)
-                let param = {
-                    "nombre": curso.nombre,
-                    "codigo": curso.codigo,
-                    "creditos": curso.creditos,
-                    "electivo": item.electivo,
-                    "aprobado": item.aprobado,
-                    "nota": item.nota,
-                    "matriculado": isMatriculado ? true : false
-                }
-                asignaturas.resp.push(param);
+        let freeCoursesList = getCoursesByCode(data.text, util.getFreeCourses());
+
+        freeCoursesList.resp.forEach(item => {
+
+            let fd = asignaturas.resp.find(item2 => item2.type === "FD" && item2.aprobado);
+            let cc = asignaturas.resp.find(item2 => item2.type === "CC" && item2.aprobado);
+            let ac = asignaturas.resp.find(item2 => item2.type === "AC" && item2.aprobado);
+
+            freeCourses.fisicoDeportivo = fd ? true : false;
+            freeCourses.civicoComunitario = cc ? true : false;
+            freeCourses.artisticoCultural = ac ? true : false;
+
+            let isMatriculado = matriculados.resp.find(m => item.codigo === m.codigo);
+            let param = {
+                ...item,
+                "matriculado": isMatriculado ? true : false
             }
+            if(!fd && item.type =="FD" && item.aprobado){
+                let curso = util.cursoByType(mallaActual, item.type);
+                freeCourses.fisicoDeportivo = true;
+                curriculaFreeCoursesNumber --;
+                param.nombre = curso.nombre;
+                param.codigo = curso.codigo;
+                param.creditos = curso.creditos;
+
+            }else if(!cc && item.type =="CC" && item.aprobado){
+                let curso = util.cursoByType(mallaActual, item.type);
+                freeCourses.civicoComunitario = true;
+                curriculaFreeCoursesNumber --;
+                param.nombre = curso.nombre;
+                param.codigo = curso.codigo;
+                param.creditos = curso.creditos;
+
+            }else if(!ac && item.type =="AC" && item.aprobado) {
+                let curso = util.cursoByType(mallaActual, item.type);
+                freeCourses.artisticoCultural = true;
+                curriculaFreeCoursesNumber --;
+                param.nombre = curso.nombre;
+                param.codigo = curso.codigo;
+                param.creditos = curso.creditos;
+            }
+            if(item.aprobado) freeCourses.freeCoursesCursed ++;
+
+            asignaturas.resp.push(param);
         });
+
+        freeCourses.freeCoursesCursed += curriculaFreeCoursesNumber;
 
         asignaturas.resp.forEach(item1 => {
             const isMatriculado = matriculados.resp.find(item2 => item1.codigo === item2.codigo);
@@ -611,6 +695,9 @@ async function getRemoteRecord(cookie, user) {
 
         if(asignaturas.electiveNumber > 4){
             approvedCredits = approvedCredits - ((asignaturas.electiveNumber-4)*3);
+        }
+        if (freeCourses.freeCoursesCursed > 3){
+            approvedCredits = approvedCredits - (freeCourses.freeCoursesCursed-3);
         }
 
         let registeredCredits = matriculados.resp.reduce((acumulador, actual) => {

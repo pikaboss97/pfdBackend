@@ -31,6 +31,22 @@ const CredentialSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    lastSemester: {
+        type: String,
+        required: true,
+    },
+    estado: {
+        type: String,
+        required: true,
+    },
+    semesterProgress: {
+        type: String,
+        required: true,
+    },
+    semesterEnd: {
+        type: String,
+        required: true,
+    },
     ep: {
         type: String,
         required: true,
