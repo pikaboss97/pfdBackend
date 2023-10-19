@@ -505,7 +505,7 @@ const ACT_LIBRES = {
   'L0117': { codigo: "L0117", nombre: "FUTSAL", creditos: "1", al: true, type: "FD" },
   'LI040040': { codigo: "LI040040", nombre: "FUTSAL", creditos: "1", al: true, type: "FD" },
 
-  'L0074': { codigo: "L0074", nombre: "DEPORTE DEE AVENTURA", creditos: "1", al: true, type: "FD" },
+  'L0074': { codigo: "L0074", nombre: "DEPORTE DE AVENTURA", creditos: "1", al: true, type: "FD" },
   'L0004': { codigo: "L0004", nombre: "FISICO CULTURISMO", creditos: "1", al: true, type: "FD" },
   'L0005': { codigo: "L0005", nombre: "FRONTON", creditos: "1", al: true, type: "FD" },
   'L0007': { codigo: "L0007", nombre: "GIMNASIA DEPORTIVA", creditos: "1", al: true, type: "FD" },
@@ -529,6 +529,7 @@ const ACT_LIBRES = {
   'LI040045': { codigo: "LI040045", nombre: "CUENTOS Y ENSAYOS", creditos: "1", al: true, type: "AC" },
   'L0131': { codigo: "L0131", nombre: "CINECLUB", creditos: "1", al: true, type: "AC" },
   'LI040046': { codigo: "LI040046", nombre: "CINECLUB", creditos: "1", al: true, type: "AC" },
+  'LI05AC06': { codigo: "LI05AC06", nombre: "CINECLUB", creditos: "1", al: true, type: "AC" },
   'L0132': { codigo: "L0132", nombre: "TEATRO", creditos: "1", al: true, type: "AC" },
   'LI040047': { codigo: "LI040047", nombre: "TEATRO", creditos: "1", al: true, type: "AC" },
   'L0133': { codigo: "L0133", nombre: "POESIA", creditos: "1", al: true, type: "AC" },
