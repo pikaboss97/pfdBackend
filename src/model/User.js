@@ -3,47 +3,67 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
 
-    nombre: {
+    name: {
         type: String,
         required: true,
     },
-    apellidos: {
+    lastname: {
         type: String,
         required: true,
     },
-    codigo: {
+    studentCode: {
         type: String,
         required: true,
     },
-    DNI: {
+    documentNumber: {
         type: Date,
         required: false,
     },
-    fechaIngreso: {
+    professionalSchool: {
         type: String,
         required: false,
     },
-    modoIngreso: {
+    studyPlan: {
         type: String,
         required: false,
     },
-    email: {
+    studyPlanCode: {
         type: String,
         required: false,
     },
-    celular: {
+    ingressDate: {
+        type: String,
+        required: false,
+    },
+    ingressMode: {
+        type: String,
+        required: false,
+    },
+    personalEmail: {
+        type: String,
+        required: false,
+    },
+    institutionalEmail: {
+        type: String,
+        required: false,
+    },
+    studentImage: {
+        type: String,
+        required: false,
+    },
+    primaryCellphone: {
         type: String,
         required: true,
     },
-    distrito: {
+    emergencyCellphone: {
         type: String,
         required: false,
     },
-    provincia: {
+    province: {
         type: String,
         required: false,
     },
-    departamento: {
+    state: {
         type: String,
         required: false,
     },
@@ -55,27 +75,12 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    referencia: {
+    reference: {
         type: String,
         required: false,
     },
-    deescription: {
+    description: {
         type: String,
-        required: false,
-    },
-    idFacultad: {
-        type: mongoose.Schema.ObjectId, 
-        ref: 'facultad',
-        required: false,
-    },
-    idCurricula: {
-        type: mongoose.Schema.ObjectId, 
-        ref: 'curricula',
-        required: false,
-    },
-    idRecord: {
-        type: mongoose.Schema.ObjectId, 
-        ref: 'record',
         required: false,
     },
 },

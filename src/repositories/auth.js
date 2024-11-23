@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const jwt = require('jsonwebtoken');
 const authlModel = require("../model/Auth");
 require("dotenv").config();
 

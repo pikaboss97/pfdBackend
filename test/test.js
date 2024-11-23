@@ -11,6 +11,7 @@ const url = "http://localhost:3000";
 describe("Pruebas al modulo de Curricula", function () {
   it("obtener la lista de curriculas", async function () {
     const list = await httpHelper.get(url, "/curricula/list");
+    console.log(list.body);
     expect(list.body).to.not.be.null;
     expect(list.status).to.equal(200);
   });
@@ -22,6 +23,7 @@ describe("Pruebas al modulo de Curricula", function () {
 
   it("obtener curricula por id existente", async function () {
     const list = await httpHelper.get(url, "/curricula?ep=FIIS2018");
+    console.log(list.body);
     expect(list.body).to.not.be.null;
     expect(list.status).to.equal(200);
   });
@@ -46,6 +48,7 @@ describe("Pruebas al modulo de Record de Notas", () => {
           'Content-Type': 'multipart/form-data', // Importante: Establecer el tipo de contenido adecuado
         },
       });
+      console.log(response.data);
       expect(response.body).to.not.be.null;
       expect(response.status).to.equal(200);
     } catch (error) {

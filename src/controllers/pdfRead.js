@@ -11,6 +11,8 @@ var axios = require('axios');
 var qs = require('qs');
 const { Int32 } = require('bson');
 
+
+
 exports.auth = async function (req, res) {
     try {
         let params = req.body;
@@ -98,8 +100,27 @@ exports.getPdf = async function (req, res) {
 
 exports.getUserData = async function (req, res) {
     try {
+
+        //obtener la informacion general del semestre, curricula, estatus del usuario desde ocda
+        
+        //buscar al usuario en la base de datos
+
+        //validar si el usuario existe en la base de datos if()
+
+            //se verifica si el semestre actual y el status coinciden con la informacion obtenida desde ocda
+
+            //si coinciden solo se actualiza el avance del semestre 
+
+            //de no coincidir se realiza la actualizacion de la informacion tanto de las notas como la informacion general
+
+            //retornar la informacion general actulaizada del usuario
+
+        //si el usuario no existe en la base de datos quiere decir que es un usuario nuevo else()
+        
+
         let params = req.query;
         const data = await credentialModel.findOne({ code: params.code })
+
         delete data.password;
         res.status(200).send(data);
     } catch (error) {
@@ -230,7 +251,7 @@ exports.loadPdf = async function (req, res) {
     }
     //let saved = await recordModel.create(response);
     //console.log(saved);
-    //res.send(response);
+    res.send(response);
 /* 
     if(req.file){
         const excelFile = convert.jsonToExcel(asignaturas.resp)
@@ -518,7 +539,6 @@ async function authOcdaApi(user, cookie) {
     };
     try {
         const response = await axios(config);
-        
         if (!response.data.login) throw new Error('no login');
         const headers = response.headers['set-cookie'];
         return getStringBetween(headers[0], "SGASID=", "; path");

@@ -77,6 +77,92 @@ const CURRICULA = {
 
     'TOTALCREDITS': 210,
     'YEAR': 2018
+  },  
+  'INGENIERIA EN INFORMATICA Y SISTEMAS2024': {
+    'IS040101': { codigo: "IS040101", nombre: "MATEMATICA BASICA I", creditos: "4", req: [], semestre: "1", type: "I" },
+    'IS040102': { codigo: "IS040102", nombre: "TALLER DE HABILIDADES BLANDAS", creditos: "3", req: [], semestre: "1", type: "I" },
+    'IS040103': { codigo: "IS040103", nombre: "SOSTENIBILIDAD Y RESPONSABILIDAD SOCIAL", creditos: "3", req: [], semestre: "1", type: "I" },
+    'IS040104': { codigo: "IS040104", nombre: "REDACCION Y COMPRENSION LECTORA", creditos: "3", req: [], semestre: "1", type: "I" },
+    'IS040105': { codigo: "IS040105", nombre: "FUNDAMENTOS DE COMPUTACION", creditos: "5", req: [], semestre: "1", type: "I" },
+    'IS040106': { codigo: "IS040106", nombre: "ACTIVIDAD LIBRE - FISICO DEPORTIVO", creditos: "1", req: [], semestre: "1", type: "I", cat: "FD" },
+
+    'IS040201': { codigo: "IS040201", nombre: "MATEMATICA BASICA II", creditos: "4", req: ["IS040101"], semestre: "2", type: "P" },
+    'IS040202': { codigo: "IS040202", nombre: "PENSAMIENTO SISTEMICO", creditos: "3", req: ["IS040102"], semestre: "2", type: "P" },
+    'IS040203': { codigo: "IS040203", nombre: "PROGRAMACION BASICA", creditos: "5", req: ["IS040105"], semestre: "2", type: "P" },
+    'IS040204': { codigo: "IS040204", nombre: "SOPORTE DE TI", creditos: "4", req: ["IS040105"], semestre: "2", type: "P" },
+    'IS040205': { codigo: "IS040205", nombre: "INGLES TECNICO PARA INFORMATICA", creditos: "4", req: ["IS040102","IS040104"], semestre: "2", type: "P" },
+    'IS040206': { codigo: "IS040206", nombre: "ACTIVIDAD LIBRE - ARTISTICO CULTURALES", creditos: "1", req: [], semestre: "2", type: "P", cat: "AC" },
+
+    'IS040301': { codigo: "IS040301", nombre: "MATEMATICA SUPERIOR", creditos: "4", req: ["IS040201"], semestre: "3", type: "I" },
+    'IS040302': { codigo: "IS040302", nombre: "MATEMATICA DISCRETA", creditos: "4", req: ["IS040201"], semestre: "3", type: "I" },
+    'IS040303': { codigo: "IS040303", nombre: "ESTRUCTURA DE DATOS Y ALGORITMOS", creditos: "4", req: ["IS040203"], semestre: "3", type: "I" },
+    'IS040304': { codigo: "IS040304", nombre: "SISTEMAS OPERATIVOS I", creditos: "4", req: ["IS040204"], semestre: "3", type: "I" },
+    'IS040305': { codigo: "IS040305", nombre: "REDES Y CONECTIVIDAD I", creditos: "4", req: ["IS040204"], semestre: "3", type: "I" },
+    'IS040306': { codigo: "IS040306", nombre: "ACTIVIDAD LIBRE - CIVICO COMUNITARIAS", creditos: "1", req: [], semestre: "3", type: "I", cat: "CC" },
+
+    'IS040401': { codigo: "IS040401", nombre: "FISICA", creditos: "4", req: ["IS040301", "58 creditos"], semestre: "4", type: "P" },
+    'IS040402': { codigo: "IS040402", nombre: "DISEÑO DE BASE DE DATOS", creditos: "4", req: ["IS040303"], semestre: "4", type: "P" },
+    'IS040403': { codigo: "IS040403", nombre: "CONSTRUCCION DE SOFTWARE I", creditos: "5", req: ["IS040303"], semestre: "4", type: "P" },
+    'IS040404': { codigo: "IS040404", nombre: "SISTEMAS OPERATIVOS II", creditos: "4", req: ["IS040304"], semestre: "4", type: "P" },
+    'IS040405': { codigo: "IS040405", nombre: "REDES Y CONECTIVIDAD II", creditos: "4", req: ["IS040302", "IS040305"], semestre: "4", type: "P" },
+
+    'IS040501': { codigo: "IS040501", nombre: "ESTADISTICA Y PROBABILIDADES", creditos: "4", req: ["IS040301"], semestre: "5", type: "i" },
+    'IS040502': { codigo: "IS040502", nombre: "GESTION DE BASE DE DATOS", creditos: "3", req: ["IS040402"], semestre: "5", type: "I" },
+    'IS040503': { codigo: "IS040503", nombre: "INGENIERIA DE REQUISITOS", creditos: "5", req: ["IS040403"], semestre: "5", type: "I" },
+    'IS040504': { codigo: "IS040504", nombre: "SERVIDORES Y CENTRO DE DATOS", creditos: "4", req: ["IS040404", "IS040405"], semestre: "5", type: "I" },
+    'IS040505': { codigo: "IS040505", nombre: "INTERNET DE LAS COSAS", creditos: "3", req: ["IS040401", "IS040405"], semestre: "5", type: "I" },
+    'IS040506': { codigo: "IS040506", nombre: "ETICA Y PRACTICA PROFESIONAL", creditos: "2", req: ["IS040103", "80 Creditos"], semestre: "5", type: "I" },
+
+    'IS040601': { codigo: "IS040601", nombre: "GESTION DE PROCESOS DE NEGOCIO", creditos: "4", req: ["IS040202", "80 Creditos"], semestre: "6", type: "P" },
+    'IS040602': { codigo: "IS040602", nombre: "ANALITICA DE DATOS", creditos: "3", req: ["IS040502"], semestre: "6", type: "P" },
+    'IS040603': { codigo: "IS040603", nombre: "DISEÑO DETALLADO DE SOFTWARE", creditos: "4", req: ["IS040503"], semestre: "6", type: "P" },
+    'IS040604': { codigo: "IS040604", nombre: "COMPUTACION EN LA NUBE", creditos: "3", req: ["IS040504", "IS040505"], semestre: "6", type: "P" },
+    'IS040605': { codigo: "IS040605", nombre: "GESTION DE PROYECTOS DE TI", creditos: "4", req: ["IS040504"], semestre: "6", type: "P" },
+    'IS040606': { codigo: "IS040606", nombre: "ARQUITECTURA DE SOFTWARE", creditos: "4", req: ["IS040503"], semestre: "6", type: "P" },
+
+    'IS040701': { codigo: "IS040701", nombre: "FUNDAMENTOS DE INVESTIGACION", creditos: "4", req: ["IS040205", "IS040501", "120 Creditos"], semestre: "7", type: "I" },
+    'IS040702': { codigo: "IS040702", nombre: "SISTEMAS DE INFORMACION", creditos: "3", req: ["IS040601", "IS040602"], semestre: "7", type: "I" },
+    'IS040703': { codigo: "IS040703", nombre: "CONSTRUCCION DE SOFTWARE II", creditos: "5", req: ["IS040602", "IS040603", "IS040606"], semestre: "7", type: "I" },
+    'IS040704': { codigo: "IS040704", nombre: "SEGURIDAD INFORMATICA", creditos: "4", req: ["IS040604"], semestre: "7", type: "I" },
+    'IS040705': { codigo: "IS040705", nombre: "GESTION DE SERVICIOS DE TI", creditos: "4", req: ["IS040601", "IS040605"], semestre: "7", type: "I" },
+    'IS040706': { codigo: "IS040706", nombre: "ELECTIVO I", creditos: "3", req: ["120 Creditos"], semestre: "7", type: "I", class: "E1" },
+
+    'IS040801': { codigo: "IS040801", nombre: "DISEÑO DE INVESTIGACION I", creditos: "4", req: ["IS040701"], semestre: "8", type: "P" },
+    'IS040802': { codigo: "IS040802", nombre: "DISEÑO DE SISTEMAS DE INFORMACION", creditos: "3", req: ["IS040702"], semestre: "8", type: "P" },
+    'IS040803': { codigo: "IS040803", nombre: "CALIDAD DE PRODUCTO DE SOFTWARE", creditos: "4", req: ["IS040703"], semestre: "8", type: "P" },
+    'IS040804': { codigo: "IS040804", nombre: "SEGURIDAD DE LA INFORMACION", creditos: "4", req: ["IS040704"], semestre: "8", type: "P" },
+    'IS040805': { codigo: "IS040805", nombre: "PRACTICAS PRE PROFESIONAL", creditos: "4", req: ["IS040506", "120 Creditos"], semestre: "8", type: "P", ppp:true },
+    'IS040806': { codigo: "IS040806", nombre: "ELECTIVO II", creditos: "3", req: ["IS040706"], semestre: "8", type: "P", class: "E2" },
+
+    'IS040901': { codigo: "IS040901", nombre: "DISEÑO DE INVESTIGACION II", creditos: "4", req: ["IS040801"], semestre: "9", type: "I" },
+    'IS040902': { codigo: "IS040902", nombre: "GESTION DE CALIDAD DE SISTEMAS", creditos: "4", req: ["IS040802", "120 Creditoss"], semestre: "9", type: "I" },
+    'IS040903': { codigo: "IS040903", nombre: "INTEGRACION DE SISTEMAS DE SOFTWARE", creditos: "4", req: ["IS040803"], semestre: "9", type: "I" },
+    'IS040904': { codigo: "IS040904", nombre: "ARQUITECTURA DE INFRAESTRUCTURA DE TI", creditos: "4", req: ["IS040705", "IS040804"], semestre: "9", type: "I" },
+    'IS040905': { codigo: "IS040905", nombre: "ELECTIVO III", creditos: "3", req: ["IS040806"], semestre: "9", type: "I", class: "E3" },
+    'IS040907': { codigo: "IS040907", nombre: "INNOVACION Y EMPRENDIMIENTO", creditos: "4", req: ["IS040605"], semestre: "9", type: "I" },
+
+    'IS041001': { codigo: "IS041001", nombre: "DESARROLLO DE INVESTIGACION", creditos: "5", req: ["IS040805", "IS040901"], semestre: "10", type: "P" },
+    'IS041002': { codigo: "IS041002", nombre: "ARQUITECTURA EMPRESARIAL", creditos: "4", req: ["IS040902"], semestre: "10", type: "P" },
+    'IS041003': { codigo: "IS041003", nombre: "CALIDAD DE PROCESOS DE SOFTWARE", creditos: "3", req: ["IS040803"], semestre: "10", type: "P" },
+    'IS041004': { codigo: "IS041004", nombre: "PLANIEAMIENTO Y GOBIERNO DE TI", creditos: "3", req: ["IS040904"], semestre: "10", type: "P" },
+    'IS041005': { codigo: "IS041005", nombre: "MANTENIMIENTO DE SOFTWARE", creditos: "4", req: ["IS040703"], semestre: "10", type: "P" },
+    'IS041006': { codigo: "IS041006", nombre: "ELECTIVO IV", creditos: "3", req: ["IS040905"], semestre: "10", type: "P", class: "E4" },
+
+    'IS04E101': { codigo: "IS04E101", nombre: "MÉTODOS ÁGILES PARA EL DESARROLLO DE SOFTWARE", creditos: "3", req: [], electivo: true, type: "I" },
+    'IS04E103': { codigo: "IS04E103", nombre: "PRUEBAS DE SOFTWARE", creditos: "3", req: [], electivo: true, type: "I" },
+    'IS04E105': { codigo: "IS04E105", nombre: "INTRODUCCIÓN A LA CIENCIA DE DATOS", creditos: "3", req: [], electivo: true, type: "I" },
+    'IS04E201': { codigo: "IS04E201", nombre: "LINUX AVANZADO", creditos: "3", req: [], electivo: true, type: "I" },
+    'IS04E204': { codigo: "IS04E204", nombre: "SISTEMAS INALÁMBRICOS", creditos: "3", req: [], electivo: true, type: "I" },
+
+    'IS04E102': { codigo: "IS04E102", nombre: "DISEÑO DE INTERFAZ Y EXPERIENCIA DE USUARIO", creditos: "3", req: [], electivo: true, type: "P" },
+    'IS04E104': { codigo: "IS04E104", nombre: "DESARROLLO DE APLICACIONES PARA LA NUBE", creditos: "3", req: [], electivo: true, type: "P" },
+    'IS04E106': { codigo: "IS04E106", nombre: "MACHINE LEARNING", creditos: "3", req: [], electivo: true, type: "P" },
+    'IS04E202': { codigo: "IS04E202", nombre: "PROGRAMABILIDAD DE REDES", creditos: "3", req: [], electivo: true, type: "P" },
+    'IS04E203': { codigo: "IS04E203", nombre: "REDES AVANZADAS", creditos: "3", req: [], electivo: true, type: "P" },
+    'IS04E205': { codigo: "IS04E205", nombre: "SEGURIDAD INFORMÁTICA AVANZADA", creditos: "3", req: [], electivo: true, type: "P" },
+
+    'TOTALCREDITS': 215,
+    'YEAR': 2024
   },
   'INGENIERIA EN INFORMATICA Y SISTEMASV2': {
     'BI010101': { codigo: "BI010101", nombre: "MATEMATICA BASICA", creditos: "4", req: [], semestre: "1", type:"I"},
@@ -177,25 +263,19 @@ const CURRICULA = {
     'YEAR': 2018
   },
   'INGENIERIA EN INFORMATICA Y SISTEMAS': {
-    //'BI010101': { codigo: "BI010101", nombre: "MATEMATICA BASICA", creditos: "4", semestre: "1", type:"I"},
     'IS030101': { codigo: "IS030101", nombre: "MATEMATICA BASICA", creditos: "4", req: [], semestre: "1", type: "I" },
-    //'BI010108': { codigo: "BI010108", nombre: "LENGUAJE Y REDACCION GENERAL", creditos: "3", req: [], semestre: "1", type:"I" },
     'IS030102': { codigo: "IS030102", nombre: "TALLER DE HABILIDADES BLANDAS", creditos: "4", req: [], semestre: "1", type: "I" },
     'IS030103': { codigo: "IS030103", nombre: "SOSTENIBILIDAD Y RESPONSABILIDAD SOCIAL", creditos: "3", req: [], semestre: "1", type: "I" },
     'IS030105': { codigo: "IS030105", nombre: "FUNDAMENTOS DE COMPUTACION", creditos: "5", req: [], semestre: "1", type: "I" },
     'IS030104': { codigo: "IS030104", nombre: "REDACCION Y COMPRENSION LECTORA", creditos: "4", req: [], semestre: "1", type: "I" },
-    //'IS030203': { codigo: "IS030203", nombre: "REDACCION Y COMPRENSION LECTORA", creditos: "4", req: [], semestre: "1", type: "I" },
 
-    //'BI010102': { codigo: "BI010102", nombre: "FISICA I", creditos: "4", req: ["ISO3001", "ISO30222"], semestre: "2", type:"P" },
     'IS030202': { codigo: "IS030202", nombre: "FISICA I", creditos: "4", req: ["IS030101"], semestre: "2", type: "P" },
-    //'BI010201': { codigo: "BI010201", nombre: "MATEMATICA I", creditos: "4", req: ["ISO3001", "ISO30222"], semestre: "2", type:"P" },
     'IS030201': { codigo: "IS030201", nombre: "MATEMATICA I", creditos: "4", req: ["IS030101"], semestre: "2", type: "P" },
     'IS030203': { codigo: "IS030203", nombre: "PROGRAMACION BASICA", creditos: "5", req: ["IS030105"], semestre: "2", type: "P" },
     'IS030204': { codigo: "IS030204", nombre: "SOPORTE DE TI", creditos: "4", req: ["IS030105"], semestre: "2", type: "P" },
     'IS030205': { codigo: "IS030205", nombre: "IDIOMA EXTRANJERO I", creditos: "3", req: [], semestre: "2", type: "P" },
     'IS030206': { codigo: "IS030206", nombre: "ACTIVIDAD LIBRE: FISICO - DEPORTIVA", creditos: "1", req: [], semestre: "2", type: "P", cat: "FD" },
 
-    //'BI010301': { codigo: "BI010301", nombre: "MATEMATICA II", creditos: "4", req: ["ISO3001", "ISO30222"], semestre: "3", type:"I" },
     'IS030301': { codigo: "IS030301", nombre: "MATEMATICA II", creditos: "4", req: ["IS030201"], semestre: "3", type: "I" },
     'IS030302': { codigo: "IS030302", nombre: "FISICA II", creditos: "4", req: ["IS030201", "IS030202"], semestre: "3", type: "I" },
     'IS030303': { codigo: "IS030303", nombre: "ESTRUCTURA DE DATOS Y ALGORITMOS", creditos: "5", req: ["IS030203"], semestre: "3", type: "I" },
@@ -209,7 +289,6 @@ const CURRICULA = {
     'IS030404': { codigo: "IS030404", nombre: "SISTEMAS OPERATIVOS II", creditos: "4", req: ["IS030304"], semestre: "4", type: "P" },
     'IS030405': { codigo: "IS030405", nombre: "PENSAMIENTO SISTEMICO", creditos: "4", req: ["IS030103", "60 creditos"], semestre: "4", type: "P" },
 
-    //'BI010104': { codigo: "BI010104", nombre: "ESTADISTICA GENERAL", creditos: "4", req: ["ISO3001", "ISO30222"], semestre: "5", type:"I" },
     'IS030505': { codigo: "IS030505", nombre: "ESTADISTICA Y PROBABILIDADES", creditos: "4", req: ["IS030201"], semestre: "5", type: "i" },
     'IS030501': { codigo: "IS030501", nombre: "COSTOS Y PRESUPUESTOS EN TI", creditos: "4", req: ["IS030101"], semestre: "5", type: "I" },
     'IS030502': { codigo: "IS030502", nombre: "GESTION DE BASE DE DATOS", creditos: "4", req: ["IS030204", "IS030402"], semestre: "5", type: "I" },
@@ -604,6 +683,7 @@ const ACT_LIBRES = {
 
 }
 const FACULTAD = {
+  "FIIS2024": "INGENIERIA EN INFORMATICA Y SISTEMAS2024",
   "FIIS": "INGENIERIA EN INFORMATICA Y SISTEMAS",
   "FIIS2018": "INGENIERIA EN INFORMATICA Y SISTEMAS2018",
   "FIIS2009": "INGENIERIA EN INFORMATICA Y SISTEMAS2009",

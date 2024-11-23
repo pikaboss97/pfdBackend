@@ -7,6 +7,7 @@ const cheerio = require('cheerio')
 exports.getCurricula = function (req, res) {
   try {
     let version = Number(req.query.v) >= 2018 ? "V2" : "";
+    console.log(version);
     let escuela = util.getFacultadByEP(req.query.ep);
     escuela = req.query.ep == "FIIS" ? escuela + version : escuela;
     let curricula = util.curricula(escuela);

@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 
 
 const AuthSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.ObjectId, 
-        ref: 'user',
-        required: true,
+    userName: {
+        type: String,
     },
     userCode: {
         type: String,
@@ -15,15 +13,9 @@ const AuthSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    userToken: {
-        type: String,
-        required: true,
-    },
-    loginDate: {
-        type: Date,
-        required: true,
-    },
-
+    faculty: {
+        type: String
+    }
 },
 {
     versionKey:false,
